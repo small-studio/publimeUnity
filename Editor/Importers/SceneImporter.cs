@@ -46,10 +46,7 @@ class SceneImporter : IAssetImporter
                 if (gameObject != null)
                 {
                     string isStatic = xmlObject.SelectSingleNode("Static").InnerText;
-                    if (isStatic != "Keep")
-                    {
-                        gameObject.isStatic = (isStatic == "Static");
-                    }
+                    gameObject.isStatic = (isStatic == "Static");
 
                     // Check if Layer is Valid and Set
                     string layer = xmlObject.SelectSingleNode("Layer").InnerText;

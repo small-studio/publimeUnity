@@ -13,7 +13,6 @@ class SmallAssetPostprocessor : AssetPostprocessor
 
     IAssetImporter GetAssetImporter(string path)
     {
-        // TODO use constant for extension, replace extension for small
         if (path.EndsWith(SmallImporterUtils.SMALL_MATERIAL_EXTENSION))
         {
             return new MaterialImporter();

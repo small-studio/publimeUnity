@@ -46,7 +46,6 @@ class MaterialImporter : IAssetImporter
         if (shader == null)
         {
             Debug.LogWarning("[Small Importer] The material " + fileName + " has not a valid shader name.");
-            // TODO use an error shader
         }
 
         // If the material does not exists, we create it

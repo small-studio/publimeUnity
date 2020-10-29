@@ -76,9 +76,12 @@ class SmallAssetPostprocessor : AssetPostprocessor
 
     void OnPreprocessModel()
     {
-        // Don't import materials for models
-        ModelImporter modelImporter = assetImporter as ModelImporter;
-        modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
+        if (Path.GetFileName(assetPath).StartsWith(SmallImporterWindow.prefixPrefab))
+        {
+            // Don't import materials for models
+            ModelImporter modelImporter = assetImporter as ModelImporter;
+            modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
+        }
     }
 #endregion
 

@@ -64,16 +64,6 @@ class SmallAssetPostprocessor : AssetPostprocessor
         }
     }
 
-    void OnPreprocessTexture()
-    {
-        // TODO find a better way to do this
-        if (assetPath.Contains("_Transparent"))
-        {
-            TextureImporter textureImporter  = (TextureImporter)assetImporter;
-            textureImporter.alphaIsTransparency = true;
-        }
-    }
-
     void OnPreprocessModel()
     {
         if (Path.GetFileName(assetPath).StartsWith(SmallImporterWindow.prefixPrefab))

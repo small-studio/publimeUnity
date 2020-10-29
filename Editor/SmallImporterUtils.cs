@@ -33,6 +33,10 @@ public class SmallImporterUtils
                     {
                         textureImporter.textureType = TextureImporterType.NormalMap;
                     }
+                    else if (type == "TRANSPARENT")
+                    {
+                        textureImporter.alphaIsTransparency = true;
+                    }
                     AssetDatabase.ImportAsset(path);
                     texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
                 }

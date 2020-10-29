@@ -81,6 +81,12 @@ class SceneImporter : IAssetImporter
                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                 gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
             }
+            else if (xmlObject.Name == "Camera")
+            {
+                string prefabPath = xmlObject.SelectSingleNode("Prefab").InnerText;
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            }
 
             if (gameObject != null)
             {
@@ -98,7 +104,7 @@ class SceneImporter : IAssetImporter
                 Vector3 rotationVector = SmallImporterUtils.ParseVectorXml(rotation);
 
                 gameObject.transform.rotation = new Quaternion();
-                if (xmlObject.Name == "Light")
+                if (xmlObject.Name == "Light" || xmlObject.Name == "Camera")
                 {
                     gameObject.transform.Rotate(new Vector3(90, 0, 0), Space.World);
                 }

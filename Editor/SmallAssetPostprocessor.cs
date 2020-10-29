@@ -29,6 +29,10 @@ class SmallAssetPostprocessor : AssetPostprocessor
         {
             return new LightImporter();
         }
+        else if (path.EndsWith(SmallImporterUtils.SMALL_CAMERA_EXTENSION))
+        {
+            return new CameraImporter();
+        }
         return null;
     }
 

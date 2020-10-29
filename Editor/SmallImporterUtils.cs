@@ -13,6 +13,7 @@ public class SmallImporterUtils
     public const string SMALL_MATERIAL_EXTENSION = ".subm";
     public const string SMALL_SCENE_EXTENSION = ".subs";
     public const string SMALL_LIGHT_EXTENSION = ".subl";
+    public const string SMALL_CAMERA_EXTENSION = ".subc";
 
     public static Texture ParseTextureXml(string sourceString)
     {

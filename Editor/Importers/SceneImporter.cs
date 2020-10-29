@@ -75,6 +75,12 @@ class SceneImporter : IAssetImporter
                     Debug.LogWarning("Could not instantiate prefab at path " + prefabPath);
                 }
             }
+            else if (xmlObject.Name == "Light")
+            {
+                string prefabPath = xmlObject.SelectSingleNode("Prefab").InnerText;
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                gameObject = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            }
 
             if (gameObject != null)
             {
@@ -92,6 +98,10 @@ class SceneImporter : IAssetImporter
                 Vector3 rotationVector = SmallImporterUtils.ParseVectorXml(rotation);
 
                 gameObject.transform.rotation = new Quaternion();
+                if (xmlObject.Name == "Light")
+                {
+                    gameObject.transform.Rotate(new Vector3(90, 0, 0), Space.World);
+                }
                 gameObject.transform.Rotate(new Vector3(rotationVector[0] * -1, 0, 0), Space.World);
                 gameObject.transform.Rotate(new Vector3(0, rotationVector[2] * -1, 0), Space.World);
                 gameObject.transform.Rotate(new Vector3(0, 0, rotationVector[1] * -1), Space.World);

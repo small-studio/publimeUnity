@@ -17,17 +17,7 @@ class MaterialImporter : IAssetImporter
         Shader shader = Shader.Find(shaderName);
         if (shader == null)
         {
-            if (shaderName == "Custom")
-            {
-                string shaderPath = EditorPrefs.GetString("SBI_customShader", "");
-                shader = Shader.Find(shaderPath);
-            }
-
-            if (shaderName == "Custom_Transparent")
-            {
-                string shaderPath = EditorPrefs.GetString("SBI_customShaderTransparent", "");
-                shader = Shader.Find(shaderPath);
-            }
+            Debug.LogWarning("The shader \"" + shaderName + "\" does not exists.");
         }
         return shader;
     }

@@ -32,24 +32,26 @@ class MaterialImporter : IAssetImporter
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
         string path = Path.Combine(root.SelectSingleNode("Path").InnerText, fileName + ".mat");
 
-        Shader shader = GetShaderFromName(shaderName);
-        if (shader == null)
-        {
-            Debug.LogWarning("[Small Importer] The material " + fileName + " has not a valid shader name.");
-        }
-
         // If the material does not exists, we create it
         Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (material == null)
         {
             material = new Material(Shader.Find("Standard"));
-            if (shader != null)
-            {
-                material.shader = shader;
-            }
             AssetDatabase.CreateAsset(material, path);
             Debug.Log("[Small Importer] Creating new material from xml " + fileName + ".");
         }
+        
+        Shader shader = GetShaderFromName(shaderName);
+        if (shader != null)
+        {
+            material.shader = shader;
+            Debug.Log("[Small Importer] Using shader '" + shaderName + "' for material '" + fileName + "'");
+        }
+        else
+        {
+            Debug.LogWarning("[Small Importer] The material " + fileName + " has not a valid shader name.");
+        }
+
         return material;
     }
 

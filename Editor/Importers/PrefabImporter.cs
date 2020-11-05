@@ -29,7 +29,7 @@ class PrefabImporter : SUBlime.IAssetImporter
         }
 
         // Load and assign the mesh
-        string meshPath = root.SelectSingleNode("Path").InnerText + ".fbx";
+        string meshPath = root.SelectSingleNode("Model").InnerText + ".fbx";
         Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
         MeshFilter meshFilter = prefab.AddComponent<MeshFilter>();
         meshFilter.mesh = mesh;

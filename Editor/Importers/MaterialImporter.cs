@@ -195,6 +195,7 @@ class MaterialImporter : IAssetImporter
         {
             string value = transparentXml.InnerText;
             float mode = 0.0f;
+            float threshold = 0.5f;
             if (value == "OPAQUE")
             {
                 mode = 0.0f;
@@ -202,12 +203,25 @@ class MaterialImporter : IAssetImporter
             else if (value == "CLIP")
             {
                 mode = 1.0f;
+                XmlNode clipThresholdXml = channels.SelectSingleNode("_ClipThreshold");
+                if (clipThresholdXml != null)
+                {
+                    threshold = SmallImporterUtils.ParseFloatXml(clipThresholdXml.InnerText);
+                    Debug.Log("threshold" + clipThresholdXml.InnerText);
+                }
             }
             else if (value == "BLEND")
             {
                 mode = 2.0f;
             }
+            // _Mode is for standard shaders
             material.SetFloat("_Mode", mode);
+
+            // Surface is for URP
+            // Set surface to 1 if transparent
+            material.SetFloat("_Surface", mode > 0.0f ? 1.0f : 0.0f);
+            material.SetFloat("_AlphaClip", mode == 1.0f ? 1.0f : 0.0f);
+            material.SetFloat("_Cutoff", threshold);
         }
 
         EditorUtility.SetDirty(material);

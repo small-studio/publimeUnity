@@ -68,7 +68,6 @@ public class SmallImporterUtils
         return color;
     }
 
-    
     public static Vector3 ParseVectorXml(string sourceString)
     {
         sourceString = sourceString.Substring(8, sourceString.Length - 9); // Remove parenthesis

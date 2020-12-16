@@ -62,8 +62,6 @@ class MaterialImporter : IAssetImporter
         XmlNode root = xml.DocumentElement;
 
         // Set Keywords
-        material.EnableKeyword("_NORMALMAP");
-        material.EnableKeyword("_EMISSION");
         material.EnableKeyword("_METALLICGLOSSMAP");
         material.EnableKeyword("_SPECGLOSSMAP");
 
@@ -141,6 +139,7 @@ class MaterialImporter : IAssetImporter
         XmlNode bumpMapXml = channels.SelectSingleNode("_BumpMap");
         if (bumpMapXml != null)
         {
+            material.EnableKeyword("_NORMALMAP");
             Texture texture = SmallImporterUtils.ParseTextureXml(bumpMapXml.InnerText);
             material.SetTexture("_BumpMap", texture);
         }
@@ -152,20 +151,32 @@ class MaterialImporter : IAssetImporter
             Texture texture = SmallImporterUtils.ParseTextureXml(channels.SelectSingleNode("_EmissionMap").InnerText);
             if (texture)
             {
+                material.EnableKeyword("_EMISSION");
+                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
                 material.SetTexture("_EmissionMap", texture);
                 material.SetColor("_EmissionColor", Color.white);
             }
         }
         else
         {
-            Color color = Color.white;
+            Color color = Color.black;
             XmlNode emissionColorXml = channels.SelectSingleNode("_EmissionColor");
             if (emissionColorXml != null)
             {
                 color = SmallImporterUtils.ParseColorXml(emissionColorXml.InnerText);
             }
-            material.SetColor("_EmissionColor", color);
-            material.SetTexture("_EmissionMap", null);
+            if (color != Color.black)
+            {
+                material.EnableKeyword("_EMISSION");
+                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
+                material.SetColor("_EmissionColor", color);
+                material.SetTexture("_EmissionMap", null);
+            }
+            else
+            {
+                material.DisableKeyword("_EMISSION");
+                material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+            }
         }
 
         // Tile and lightmap data

@@ -71,7 +71,7 @@ public class SmallImporterUtils
     
     public static Vector3 ParseVectorXml(string sourceString)
     {
-        sourceString = sourceString.Substring(1, sourceString.Length - 2); // Remove parenthesis
+        sourceString = sourceString.Substring(8, sourceString.Length - 9); // Remove parenthesis
         string[] splitString = sourceString.Split(',');
 
         Vector3 value = Vector3.zero;

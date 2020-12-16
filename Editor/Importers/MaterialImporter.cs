@@ -68,6 +68,25 @@ class MaterialImporter : IAssetImporter
         // Get Data from Channels when available
         XmlNode channels = root.SelectSingleNode("Channels");
 
+        // Custom parameters
+        XmlNode custom = channels.SelectSingleNode("Custom");
+        if (custom != null)
+        {
+            XmlNode name = custom.SelectSingleNode("Name");
+            if (name != null)
+            {
+                Shader shader = GetShaderFromName(name.InnerText);
+                if (shader != null)
+                {
+                    material.shader = shader;
+                    foreach (XmlNode node in custom.ChildNodes)
+                    {
+                        ParseFactory.Parse(node.InnerText, node.Name, material);
+                    }
+                }
+            }
+        }
+
         // Base Color
         XmlNode colorXml = channels.SelectSingleNode("_Color");
         if (colorXml != null)
@@ -148,7 +167,7 @@ class MaterialImporter : IAssetImporter
         XmlNode emissionMapXml = channels.SelectSingleNode("_EmissionMap");
         if (emissionMapXml != null)
         {
-            Texture texture = SmallImporterUtils.ParseTextureXml(channels.SelectSingleNode("_EmissionMap").InnerText);
+            Texture texture = SmallImporterUtils.ParseTextureXml(emissionMapXml.InnerText);
             if (texture)
             {
                 material.EnableKeyword("_EMISSION");

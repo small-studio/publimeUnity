@@ -49,6 +49,9 @@ class PrefabImporter : SUBlime.IAssetImporter
         MeshRenderer renderer = prefab.AddComponent<MeshRenderer>();
         renderer.sharedMaterials = materials;
 
+        // Load and set children
+        SmallImporterUtils.RecursiveParseTransformXml(root, prefab);
+
         // Save and unload prefab asset
         PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
         PrefabUtility.UnloadPrefabContents(prefab);

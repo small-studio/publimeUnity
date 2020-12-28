@@ -81,6 +81,91 @@ public class SmallImporterUtils
         return value;
     }
 
+    public static void RecursiveParseTransformXml(XmlNode root, GameObject parent)
+    {
+        XmlNode childrenNode = root.SelectSingleNode("Children");
+        if (childrenNode != null)
+        {
+            XmlNodeList childrenNodeList = childrenNode.ChildNodes;
+            for (int i = 0; i < childrenNodeList.Count; i++)
+            {
+                string type = childrenNodeList[i].SelectSingleNode("Type").InnerText;
+                GameObject gameObject = null;
+                if (type == "MESH")
+                {
+                    string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
+                    GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+                    gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
+
+                    if (gameObject != null)
+                    {
+                        string isStatic = childrenNodeList[i].SelectSingleNode("Static").InnerText;
+                        gameObject.isStatic = (isStatic == "Static");
+
+                        // Check if Layer is Valid and Set
+                        string layer = childrenNodeList[i].SelectSingleNode("Layer").InnerText;
+                        if (layer != "")
+                        {
+                            int layeridx = LayerMask.NameToLayer(layer);
+                            gameObject.layer = ((layeridx >= 0) ? layeridx : 0);
+                        }
+
+                        // Check if Tag is Valid and Set
+                        string tag = childrenNodeList[i].SelectSingleNode("Tag").InnerText;
+                        if (tag != "")
+                        {
+                            for (int j = 0; j < UnityEditorInternal.InternalEditorUtility.tags.Length; j++)
+                            {
+                                if (UnityEditorInternal.InternalEditorUtility.tags[j].Contains(tag))
+                                {
+                                    gameObject.tag = tag;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (type == "LIGHT" || type == "CAMERA")
+                {
+                    string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
+                    GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+                    gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
+                }
+                else if (type == "EMPTY")
+                {
+                    gameObject = new GameObject();
+                }
+
+                if (gameObject != null)
+                {
+                    SmallImporterUtils.ParseTransformXml(childrenNodeList[i], gameObject, type);
+                    gameObject.GetComponent<Transform>().SetParent(parent.GetComponent<Transform>(), false);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject.GetComponent<Transform>());
+
+                    SmallImporterUtils.RecursiveParseTransformXml(childrenNodeList[i], gameObject);
+                }
+            }
+        }
+    }
+
+    public static void ParseTransformXml(XmlNode node, GameObject gameObject, string type)
+    {
+        string location = node.SelectSingleNode("Position").InnerText;
+        string rotation = node.SelectSingleNode("Rotation").InnerText;
+        string scale = node.SelectSingleNode("Scale").InnerText;
+        string name = node.SelectSingleNode("Name").InnerText;
+
+        gameObject.name = name;
+        gameObject.transform.localPosition = SmallImporterUtils.ParseVectorXml(location);
+        gameObject.transform.localScale = SmallImporterUtils.ParseVectorXml(scale);
+
+        Vector3 rotationVector = SmallImporterUtils.ParseVectorXml(rotation);
+        gameObject.transform.rotation = new Quaternion();
+        gameObject.transform.Rotate(new Vector3(rotationVector[0] * -1, 0, 0), Space.World);
+        gameObject.transform.Rotate(new Vector3(0, rotationVector[2] * -1, 0), Space.World);
+        gameObject.transform.Rotate(new Vector3(0, 0, rotationVector[1] * -1), Space.World);
+    }
+
     public static void CreatePrefabXml(string xmlPath)
     {
         XmlDocument xml = new XmlDocument();

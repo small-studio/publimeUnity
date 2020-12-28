@@ -31,8 +31,6 @@ class CameraImporter : SUBlime.IAssetImporter
 
         Camera camera = prefab.AddComponent<Camera>();
 
-        Debug.Log("Camera" + camera);
-
         string projection = root.SelectSingleNode("Projection").InnerText;
         camera.orthographic = (projection != "PERSP");
 

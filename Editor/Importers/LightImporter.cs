@@ -39,7 +39,7 @@ class LightImporter : SUBlime.IAssetImporter
         }
         else if (type == "SPOT")
         {
-            float spotSize = float.Parse(root.SelectSingleNode("SpotSize").InnerText, CultureInfo.InvariantCulture);
+            float spotSize = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("SpotSize").InnerText);
             light.spotAngle = spotSize;
             light.type = LightType.Spot;
         }
@@ -53,24 +53,23 @@ class LightImporter : SUBlime.IAssetImporter
             if (shape == "RECTANGLE")
             {
                 light.type = LightType.Rectangle;
-                float width = float.Parse(root.SelectSingleNode("Width").InnerText, CultureInfo.InvariantCulture);
-                float height = float.Parse(root.SelectSingleNode("Height").InnerText, CultureInfo.InvariantCulture);
+                float width = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Width").InnerText);
+                float height = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Height").InnerText);
                 light.areaSize = new Vector2(width, height);
             }
             else if (shape == "DISC")
             {
                 light.type = LightType.Disc;
-                float radius = float.Parse(root.SelectSingleNode("Radius").InnerText, CultureInfo.InvariantCulture);
+                float radius = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Radius").InnerText);
                 light.areaSize = new Vector2(radius, radius);
             }
         }
 
         // Light color
-        Color color = Color.white;
-        ColorUtility.TryParseHtmlString(root.SelectSingleNode("Color").InnerText, out color);
+        Color color = SmallImporterUtils.ParseColorXml(root.SelectSingleNode("Color").InnerText);
         light.color = color;
 
-        float power = float.Parse(root.SelectSingleNode("Power").InnerText, CultureInfo.InvariantCulture);
+        float power = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Power").InnerText);
         light.intensity = power;
         light.range = power / 3.0f;
 

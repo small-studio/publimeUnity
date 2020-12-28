@@ -34,16 +34,16 @@ class CameraImporter : SUBlime.IAssetImporter
         string projection = root.SelectSingleNode("Projection").InnerText;
         camera.orthographic = (projection != "PERSP");
 
-        float fov = float.Parse(root.SelectSingleNode("Fov").InnerText, CultureInfo.InvariantCulture);
+        float fov = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Fov").InnerText);
         camera.fieldOfView = (Mathf.Atan(Mathf.Tan(Mathf.Deg2Rad * fov / 2.0f) / camera.aspect) * 2.0f) * Mathf.Rad2Deg;
 
-        float near = float.Parse(root.SelectSingleNode("Near").InnerText, CultureInfo.InvariantCulture);
+        float near = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Near").InnerText);
         camera.nearClipPlane = near;
 
-        float far = float.Parse(root.SelectSingleNode("Far").InnerText, CultureInfo.InvariantCulture);
+        float far = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Far").InnerText);
         camera.farClipPlane = far;
 
-        float size = float.Parse(root.SelectSingleNode("Size").InnerText, CultureInfo.InvariantCulture);
+        float size = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Size").InnerText);
         camera.orthographicSize = size * 0.28f;
 
         // Save and unload prefab asset

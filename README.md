@@ -1,2 +1,3 @@
 # **S** **U** **Bl** **Im** **E** (Small Unity Blender Import Export)
-Import scene from Blender to Unity
+Plugin to import scene from Blender to Unity
+The [SUBlime](https://github.com/small-studio/SUBlime) addon is used to export from Blender.

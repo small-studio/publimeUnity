@@ -25,7 +25,8 @@ public class SmallImporterUtils
             string path = splitString[2];
             if (path != null)
             {
-                TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+                // TODO find a solution to manage texture type
+                /*TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
                 if (textureImporter != null)
                 {
                     textureImporter.textureType = TextureImporterType.Default;
@@ -37,12 +38,23 @@ public class SmallImporterUtils
                     {
                         textureImporter.alphaIsTransparency = true;
                     }
-                    AssetDatabase.ImportAsset(path);
+                    AssetDatabase.ImportAsset(path);*/
                     texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
-                }
+                    Debug.Log(" - after can load : " + path + " - " + (texture != null));
+                //}
             }
         }
         return texture;
+    }
+
+    public static string GetTexturePath(string sourceString)
+    {
+        string[] splitString = sourceString.Split(',');
+        if (splitString.Length > 2)
+        {
+            return splitString[2];
+        }
+        return null;
     }
 
     public static float ParseFloatXml(string sourceString)
@@ -166,7 +178,7 @@ public class SmallImporterUtils
         gameObject.transform.Rotate(new Vector3(0, 0, rotationVector[1] * -1), Space.World);
     }
 
-    public static void CreatePrefabXml(string xmlPath)
+    public static void CreatePrefabFromXml(string xmlPath)
     {
         XmlDocument xml = new XmlDocument();
         xml.Load(xmlPath);
@@ -185,6 +197,68 @@ public class SmallImporterUtils
         }
         PrefabUtility.SaveAsPrefabAsset(gameObject, Path.Combine(path, fileName + ".prefab"));
         GameObject.DestroyImmediate(gameObject);
+    }
+
+    public static Shader GetShaderFromName(string shaderName)
+    {
+        Shader shader = Shader.Find(shaderName);
+        if (shader == null)
+        {
+            Debug.LogWarning("The shader \"" + shaderName + "\" does not exists.");
+        }
+        return shader;
+    }
+
+    public static Material CreateMaterialFromXml(string xmlPath)
+    {
+        XmlDocument xml = new XmlDocument();
+        xml.Load(xmlPath);
+        XmlNode root = xml.DocumentElement;
+
+        string shaderName = root.SelectSingleNode("Shader").InnerText;
+        string fileName = Path.GetFileNameWithoutExtension(xmlPath);
+        string path = Path.Combine(root.SelectSingleNode("Path").InnerText, fileName + ".mat");
+
+        // If the material does not exists, we create it
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(Shader.Find("Standard"));
+            AssetDatabase.CreateAsset(material, path);
+            Debug.Log("[Small Importer] Creating new material from xml " + fileName + ".");
+        }
+        
+        Shader shader = GetShaderFromName(shaderName);
+        if (shader != null)
+        {
+            material.shader = shader;
+            Debug.Log("[Small Importer] Using shader '" + shaderName + "' for material '" + fileName + "'");
+        }
+        else
+        {
+            Debug.LogWarning("[Small Importer] The material " + fileName + " has not a valid shader name.");
+        }
+
+        return material;
+    }
+    public static void RecursiveGetTransformDependecies(AAssetImporter importer, XmlNode root)
+    {
+        XmlNode childrenNode = root.SelectSingleNode("Children");
+        if (childrenNode != null)
+        {
+            XmlNodeList childrenNodeList = childrenNode.ChildNodes;
+            for (int i = 0; i < childrenNodeList.Count; i++)
+            {
+                string type = childrenNodeList[i].SelectSingleNode("Type").InnerText;
+                if (type == "MESH" || type == "LIGHT" || type == "CAMERA")
+                {
+                    string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
+                    importer.AddDependency<GameObject>(path);
+                }
+
+                SmallImporterUtils.RecursiveGetTransformDependecies(importer, childrenNodeList[i]);
+            }
+        }
     }
 }
 

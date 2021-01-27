@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Xml;
 using System.IO;
@@ -8,16 +6,41 @@ using System.IO;
 namespace SUBlime
 {
 
-class PrefabImporter : SUBlime.IAssetImporter
+class PrefabImporter : AAssetImporter
 {
-    void UpdatePrefab(string xmlPath)
+    public override void CreateDependencies(string assetPath)
     {
         XmlDocument doc = new XmlDocument();
-        doc.Load(xmlPath);
+        doc.Load(assetPath);
+        XmlNode root = doc.DocumentElement;
+
+        // Add materials dependencies
+        XmlNodeList materialsNode = root.SelectSingleNode("Materials").ChildNodes;
+        for (int i = 0; i < materialsNode.Count; i++)
+        {
+            string path = materialsNode[i].SelectSingleNode("Path").InnerText;
+            string name = materialsNode[i].SelectSingleNode("Name").InnerText;
+            string materialPath = Path.Combine(path, name + ".mat");
+            AddDependency<Material>(materialPath); 
+        }
+
+        // Add prefabs dependencies
+        SmallImporterUtils.RecursiveGetTransformDependecies(this, root);
+    }
+
+    public override void OnPreImport(string assetPath)
+    {
+        SmallImporterUtils.CreatePrefabFromXml(assetPath);
+    }
+
+    public override void OnPostImport(string assetPath)
+    {
+        XmlDocument doc = new XmlDocument();
+        doc.Load(assetPath);
         XmlNode root = doc.DocumentElement;
 
         string prefabPath = root.SelectSingleNode("Path").InnerText;
-        string fileName = Path.GetFileNameWithoutExtension(xmlPath);
+        string fileName = Path.GetFileNameWithoutExtension(assetPath);
         string fullPath = Path.Combine(prefabPath, fileName + ".prefab");
 
         // Load the prefab asset
@@ -55,16 +78,9 @@ class PrefabImporter : SUBlime.IAssetImporter
         // Save and unload prefab asset
         PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
         PrefabUtility.UnloadPrefabContents(prefab);
-    }
 
-    public void OnPreImport(string assetPath, AssetImporter importer)
-    {
-        SmallImporterUtils.CreatePrefabXml(assetPath);
-    }
-
-    public void OnPostImport(string assetPath)
-    {
-        UpdatePrefab(assetPath);
+        // Force Unity to update the asset, without this we have to manually reload unity (by losing and gaining focus on the editor)
+        AssetDatabase.ImportAsset(fullPath);
     }
 }
 

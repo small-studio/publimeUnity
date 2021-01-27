@@ -51,7 +51,7 @@ class LightImporter : AAssetImporter
         }
         else if (type == "SPOT")
         {
-            float spotSize = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("SpotSize").InnerText);
+            float spotSize = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("SpotSize").InnerText);
             light.spotAngle = spotSize;
             light.type = LightType.Spot;
         }
@@ -65,23 +65,23 @@ class LightImporter : AAssetImporter
             if (shape == "RECTANGLE")
             {
                 light.type = LightType.Rectangle;
-                float width = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Width").InnerText);
-                float height = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Height").InnerText);
+                float width = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Width").InnerText);
+                float height = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Height").InnerText);
                 light.areaSize = new Vector2(width, height);
             }
             else if (shape == "DISC")
             {
                 light.type = LightType.Disc;
-                float radius = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Radius").InnerText);
+                float radius = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Radius").InnerText);
                 light.areaSize = new Vector2(radius, radius);
             }
         }
 
         // Light color
-        Color color = SmallImporterUtils.ParseColorXml(root.SelectSingleNode("Color").InnerText);
+        Color color = SmallParserUtils.ParseColorXml(root.SelectSingleNode("Color").InnerText);
         light.color = color;
 
-        float power = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Power").InnerText);
+        float power = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Power").InnerText);
         light.intensity = power;
         light.range = power / 3.0f;
 

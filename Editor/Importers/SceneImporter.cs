@@ -42,7 +42,7 @@ class SceneImporter : AAssetImporter
         }
 
         // Load and set children
-        SmallImporterUtils.RecursiveParseTransformXml(root, prefab);
+        SmallParserUtils.RecursiveParseTransformXml(root, prefab);
 
         // Save and unload prefab asset
         PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);

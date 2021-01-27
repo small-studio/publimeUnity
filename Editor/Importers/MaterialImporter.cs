@@ -24,7 +24,6 @@ class MaterialImporter : AAssetImporter
         textures.Add("_EmissionMap");
         textures.Add("_Lightmap");
 
-        // TODO create function with other specific function for add dependency
         // Add textures dependencies
         XmlNode channels = root.SelectSingleNode("Channels");
         foreach (string texture in textures)
@@ -74,7 +73,7 @@ class MaterialImporter : AAssetImporter
         XmlNode colorXml = channels.SelectSingleNode("_Color");
         if (colorXml != null)
         {
-            Color color = SmallImporterUtils.ParseColorXml(colorXml.InnerText);
+            Color color = SmallParserUtils.ParseColorXml(colorXml.InnerText);
             _material.SetColor("_Color", color);
             _material.SetColor("_BaseColor", color); // URP Unlit
             _material.SetColor("_UnlitColor", color); // HDRP Unlit
@@ -84,7 +83,7 @@ class MaterialImporter : AAssetImporter
         XmlNode mainTexXml = channels.SelectSingleNode("_MainTex");
         if (mainTexXml != null)
         {
-            Texture texture = SmallImporterUtils.ParseTextureXml(mainTexXml.InnerText);
+            Texture texture = SmallParserUtils.ParseTextureXml(mainTexXml.InnerText);
             _material.SetTexture("_MainTex", texture);
             _material.SetTexture("_BaseMap", texture); // URP Unlit
             _material.SetTexture("_UnlitColorMap", texture); //HDRP Unlit
@@ -95,7 +94,7 @@ class MaterialImporter : AAssetImporter
         XmlNode metallicGlossMapXml = channels.SelectSingleNode("_MetallicGlossMap");
         if (metallicGlossMapXml != null)
         {
-            Texture texture = SmallImporterUtils.ParseTextureXml(metallicGlossMapXml.InnerText);
+            Texture texture = SmallParserUtils.ParseTextureXml(metallicGlossMapXml.InnerText);
 
             _material.EnableKeyword("_METALLICGLOSSMAP");
             if (texture)
@@ -108,7 +107,7 @@ class MaterialImporter : AAssetImporter
                 XmlNode metallicXml = channels.SelectSingleNode("_Metallic");
                 if (metallicXml != null)
                 {
-                    float value = SmallImporterUtils.ParseFloatXml(metallicXml.InnerText);
+                    float value = SmallParserUtils.ParseFloatXml(metallicXml.InnerText);
                     _material.SetTexture("_MetallicGlossMap", null);
                     _material.SetFloat("_Metallic", value);
                     _material.SetFloat("_UseMetalicMap", 0.0f); // URP Autodesk
@@ -121,7 +120,7 @@ class MaterialImporter : AAssetImporter
         if (specMapXml != null)
         {
             _material.EnableKeyword("_SPECGLOSSMAP");
-            Texture texture = SmallImporterUtils.ParseTextureXml(specMapXml.InnerText);
+            Texture texture = SmallParserUtils.ParseTextureXml(specMapXml.InnerText);
             if (texture)
             {
                 _material.SetTexture("_SpecGlossMap", texture);
@@ -132,7 +131,7 @@ class MaterialImporter : AAssetImporter
                 XmlNode glossinessXml = channels.SelectSingleNode("_Glossiness");
                 if (glossinessXml != null)
                 {
-                    float value = SmallImporterUtils.ParseFloatXml(glossinessXml.InnerText);
+                    float value = SmallParserUtils.ParseFloatXml(glossinessXml.InnerText);
                     _material.SetTexture("_SpecGlossMap", null);
                     _material.SetFloat("_Glossiness", value);
                     _material.SetFloat("_UseRoughnessMap", 0.0f); // URP Autodesk
@@ -145,7 +144,7 @@ class MaterialImporter : AAssetImporter
         if (bumpMapXml != null)
         {
             _material.EnableKeyword("_NORMALMAP");
-            Texture texture = SmallImporterUtils.ParseTextureXml(bumpMapXml.InnerText);
+            Texture texture = SmallParserUtils.ParseTextureXml(bumpMapXml.InnerText);
             _material.SetTexture("_BumpMap", texture);
         }
 
@@ -153,7 +152,7 @@ class MaterialImporter : AAssetImporter
         XmlNode emissionMapXml = channels.SelectSingleNode("_EmissionMap");
         if (emissionMapXml != null)
         {
-            Texture texture = SmallImporterUtils.ParseTextureXml(emissionMapXml.InnerText);
+            Texture texture = SmallParserUtils.ParseTextureXml(emissionMapXml.InnerText);
             if (texture)
             {
                 _material.EnableKeyword("_EMISSION");
@@ -168,7 +167,7 @@ class MaterialImporter : AAssetImporter
             XmlNode emissionColorXml = channels.SelectSingleNode("_EmissionColor");
             if (emissionColorXml != null)
             {
-                color = SmallImporterUtils.ParseColorXml(emissionColorXml.InnerText);
+                color = SmallParserUtils.ParseColorXml(emissionColorXml.InnerText);
             }
             if (color != Color.black)
             {
@@ -188,19 +187,19 @@ class MaterialImporter : AAssetImporter
         XmlNode tileMaxXml = channels.SelectSingleNode("_TileMax");
         if (tileMaxXml != null)
         {
-            float tileMax = SmallImporterUtils.ParseFloatXml(tileMaxXml.InnerText);
+            float tileMax = SmallParserUtils.ParseFloatXml(tileMaxXml.InnerText);
             float tileScale = 1.0f / tileMax;
             _material.SetFloat("_TileScale", tileScale);
 
-            float tileX = SmallImporterUtils.ParseFloatXml(channels.SelectSingleNode("_TileX").InnerText);
-            float tileY = SmallImporterUtils.ParseFloatXml(channels.SelectSingleNode("_TileY").InnerText);
+            float tileX = SmallParserUtils.ParseFloatXml(channels.SelectSingleNode("_TileX").InnerText);
+            float tileY = SmallParserUtils.ParseFloatXml(channels.SelectSingleNode("_TileY").InnerText);
             _material.SetVector("_Offset", new Vector4(tileX * tileScale, tileY * tileScale));
             
             // Lightmap
             XmlNode lightmapXml = channels.SelectSingleNode("_Lightmap");
             if (lightmapXml != null)
             {
-                Texture texture = SmallImporterUtils.ParseTextureXml(lightmapXml.InnerText);
+                Texture texture = SmallParserUtils.ParseTextureXml(lightmapXml.InnerText);
                 _material.SetTexture("_Lightmap", texture);
             }
         }
@@ -222,7 +221,7 @@ class MaterialImporter : AAssetImporter
                 XmlNode clipThresholdXml = channels.SelectSingleNode("_ClipThreshold");
                 if (clipThresholdXml != null)
                 {
-                    threshold = SmallImporterUtils.ParseFloatXml(clipThresholdXml.InnerText);
+                    threshold = SmallParserUtils.ParseFloatXml(clipThresholdXml.InnerText);
                     Debug.Log("threshold" + clipThresholdXml.InnerText);
                 }
             }

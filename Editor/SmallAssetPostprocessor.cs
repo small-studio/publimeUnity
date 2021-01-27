@@ -77,6 +77,7 @@ class SmallAssetPostprocessor : AssetPostprocessor
     {
         Debug.Log("[OnPostprocessAllAssets]");
         
+        // Post import all assets if dependecies can be loaded
         List<string> toDelete = new List<string>();
         foreach (KeyValuePair<string, AAssetImporter> item in _importers)
         {
@@ -87,6 +88,7 @@ class SmallAssetPostprocessor : AssetPostprocessor
                 toDelete.Add(item.Key);
             }
         }
+
         // Delete imported assets
         foreach (string key in toDelete)
         {

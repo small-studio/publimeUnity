@@ -46,16 +46,16 @@ class CameraImporter : AAssetImporter
         string projection = root.SelectSingleNode("Projection").InnerText;
         camera.orthographic = (projection != "PERSP");
 
-        float fov = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Fov").InnerText);
+        float fov = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Fov").InnerText);
         camera.fieldOfView = (Mathf.Atan(Mathf.Tan(Mathf.Deg2Rad * fov / 2.0f) / camera.aspect) * 2.0f) * Mathf.Rad2Deg;
 
-        float near = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Near").InnerText);
+        float near = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Near").InnerText);
         camera.nearClipPlane = near;
 
-        float far = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Far").InnerText);
+        float far = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Far").InnerText);
         camera.farClipPlane = far;
 
-        float size = SmallImporterUtils.ParseFloatXml(root.SelectSingleNode("Size").InnerText);
+        float size = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Size").InnerText);
         camera.orthographicSize = size * 0.28f;
 
         // Save and unload prefab asset

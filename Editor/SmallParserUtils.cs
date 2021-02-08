@@ -19,8 +19,7 @@ public class SmallParserUtils
             string path = splitString[2];
             if (path != null)
             {
-                // TODO find a solution to manage texture type
-                /*TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+                TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
                 if (textureImporter != null)
                 {
                     textureImporter.textureType = TextureImporterType.Default;
@@ -32,9 +31,9 @@ public class SmallParserUtils
                     {
                         textureImporter.alphaIsTransparency = true;
                     }
-                    AssetDatabase.ImportAsset(path);*/
                     texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
-                //}
+                    AssetDatabase.ImportAsset(path);
+                }
             }
         }
         return texture;

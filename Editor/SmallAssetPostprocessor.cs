@@ -44,20 +44,15 @@ class SmallAssetPostprocessor : AssetPostprocessor
         {
             if (!_importers.ContainsKey(assetPath))
             {
-                Debug.Log("[OnPreprocessAsset] Importing asset: " + assetPath);
-                importer.OnPreImport(assetPath);
                 importer.CreateDependencies(assetPath);
+                Debug.Log("[OnPreprocessAsset] Importing asset: " + assetPath + " with " + importer.DependencyCount + (importer.DependencyCount == 1 ? " dependency" : " dependencies"));
+                importer.OnPreImport(assetPath);
                 _importers.Add(assetPath, importer);
             }
             else
             {
                 Debug.LogError("Asset already in the list : " + assetPath);
             }
-        }
-        else
-        {
-            // TODO Log system 
-            //Debug.Log("[OnPreprocessAsset] No importer for asset: " + assetPath);
         }
     }
 
@@ -75,8 +70,6 @@ class SmallAssetPostprocessor : AssetPostprocessor
 #region PostProcess
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
-        Debug.Log("[OnPostprocessAllAssets]");
-        
         // Post import all assets if dependecies can be loaded
         List<string> toDelete = new List<string>();
         foreach (KeyValuePair<string, AAssetImporter> item in _importers)

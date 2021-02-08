@@ -42,6 +42,9 @@ public class SmallImporterUtils
         {
             Directory.CreateDirectory(path);
         }
+
+        Debug.Log("[Small Importer] Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
+
         PrefabUtility.SaveAsPrefabAsset(gameObject, Path.Combine(path, fileName + ".prefab"));
         GameObject.DestroyImmediate(gameObject);
     }
@@ -67,9 +70,11 @@ public class SmallImporterUtils
         string path = Path.Combine(root.SelectSingleNode("Path").InnerText, fileName + ".mat");
 
         // If the material does not exists, we create it
+        bool isCreating = false;
         Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (material == null)
         {
+            isCreating = true;
             material = new Material(Shader.Find("Standard"));
             AssetDatabase.CreateAsset(material, path);
         }
@@ -78,11 +83,11 @@ public class SmallImporterUtils
         if (shader != null)
         {
             material.shader = shader;
-            Debug.Log("[Small Importer] Creating new material from xml '" + fileName + "' using shader '" + shaderName + "'");
+            Debug.Log("[Small Importer] " + (isCreating ? "Creating" : "Loading") + " material '" + fileName + "' from xml '" + xmlPath + "' using shader '" + shaderName + "'");
         }
         else
         {
-            Debug.Log("[Small Importer] Creating new material from xml '" + fileName + "'. Shader name is invalid '" + shaderName + "'");
+            Debug.Log("[Small Importer] " + (isCreating ? "Creating" : "Loading") + " material '" + fileName + "'from xml '" + xmlPath + "'. Shader name is invalid '" + shaderName + "'");
         }
 
         return material;

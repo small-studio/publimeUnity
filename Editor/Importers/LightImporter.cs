@@ -88,6 +88,9 @@ class LightImporter : AAssetImporter
         // Save and unload prefab asset
         PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
         PrefabUtility.UnloadPrefabContents(prefab);
+
+        // Force Unity to update the asset, without this we have to manually reload unity (by losing and gaining focus on the editor)
+        AssetDatabase.ImportAsset(fullPath);
     }
 }
 

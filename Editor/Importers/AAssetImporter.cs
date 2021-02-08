@@ -43,6 +43,11 @@ public abstract class AAssetImporter
         return true; 
     }
 
+    public int DependencyCount
+    {
+        get { return _dependencies.Count; }
+    }
+
     public abstract void CreateDependencies(string assetPath);
     public abstract void OnPreImport(string assetPath);
     public abstract void OnPostImport(string assetPath);

@@ -24,6 +24,10 @@ class PrefabImporter : AAssetImporter
             AddDependency<Material>(materialPath); 
         }
 
+        // Add mesh dependency
+        string meshPath = root.SelectSingleNode("Model").InnerText + ".fbx";
+        AddDependency<Mesh>(meshPath); 
+
         // Add prefabs dependencies
         SmallImporterUtils.RecursiveGetTransformDependecies(this, root);
     }

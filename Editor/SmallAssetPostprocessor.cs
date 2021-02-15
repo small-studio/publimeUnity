@@ -87,6 +87,8 @@ class SmallAssetPostprocessor : AssetPostprocessor
         {
             _importers.Remove(key);
         }
+
+        Debug.Log(_importers.Count + " asset(s) waiting for dependencies");
     }
 #endregion
 }

@@ -14,6 +14,12 @@ class CameraImporter : AAssetImporter
         doc.Load(assetPath);
         XmlNode root = doc.DocumentElement;
 
+        string path = root.SelectSingleNode("Path").InnerText;
+        string fileName = Path.GetFileNameWithoutExtension(assetPath);
+
+        // Add it's own prefab dependency
+        AddDependency<GameObject>(Path.Combine(path, fileName + ".prefab"));
+
         // Add prefabs dependencies
         SmallImporterUtils.RecursiveGetTransformDependecies(this, root);
     }

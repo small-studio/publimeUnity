@@ -50,6 +50,7 @@ public class SmallImporterUtils
 
         string path = root.SelectSingleNode("Path").InnerText;
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
+        string fullPath = Path.Combine(path, fileName + ".prefab");
         
         if (PrefabExists(fileName))
         {
@@ -67,9 +68,12 @@ public class SmallImporterUtils
             
             Debug.Log("[Small Importer] Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
             
-            PrefabUtility.SaveAsPrefabAsset(prefab, Path.Combine(path, fileName + ".prefab"));
+            PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
             GameObject.DestroyImmediate(prefab);
         }
+
+        // Update the created asset to ensure we trigger the 'OnPostprocessAllAssets' method
+        AssetDatabase.ImportAsset(fullPath);
     }
 
     public static Shader GetShaderFromName(string shaderName)

@@ -21,12 +21,18 @@ class PrefabImporter : AAssetImporter
             string path = materialsNode[i].SelectSingleNode("Path").InnerText;
             string name = materialsNode[i].SelectSingleNode("Name").InnerText;
             string materialPath = Path.Combine(path, name + ".mat");
-            AddDependency<Material>(materialPath); 
+            AddDependency<Material>(materialPath);
         }
 
         // Add mesh dependency
         string meshPath = root.SelectSingleNode("Model").InnerText + ".fbx";
-        AddDependency<Mesh>(meshPath); 
+        AddDependency<Mesh>(meshPath);
+
+        string path = root.SelectSingleNode("Path").InnerText;
+        string fileName = Path.GetFileNameWithoutExtension(assetPath);
+
+        // Add it's own prefab dependency
+        AddDependency<GameObject>(Path.Combine(path, fileName + ".prefab"));
 
         // Add prefabs dependencies
         SmallImporterUtils.RecursiveGetTransformDependecies(this, root);

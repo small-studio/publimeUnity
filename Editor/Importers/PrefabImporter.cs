@@ -18,10 +18,10 @@ class PrefabImporter : AAssetImporter
         XmlNodeList materialsNode = root.SelectSingleNode("Materials").ChildNodes;
         for (int i = 0; i < materialsNode.Count; i++)
         {
-            string path = materialsNode[i].SelectSingleNode("Path").InnerText;
+            string materialPath = materialsNode[i].SelectSingleNode("Path").InnerText;
             string name = materialsNode[i].SelectSingleNode("Name").InnerText;
-            string materialPath = Path.Combine(path, name + ".mat");
-            AddDependency<Material>(materialPath);
+            string fullPath = Path.Combine(materialPath, name + ".mat");
+            AddDependency<Material>(fullPath);
         }
 
         // Add mesh dependency

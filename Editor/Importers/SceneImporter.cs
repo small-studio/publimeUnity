@@ -34,19 +34,23 @@ class SceneImporter : AAssetImporter
         string fullPath = Path.Combine(prefabPath, fileName + ".prefab");
 
         // Load the prefab asset
-        GameObject prefab = PrefabUtility.LoadPrefabContents(fullPath);
-        if (prefab == null)
+        GameObject prefab = AssetDatabase.LoadMainAssetAtPath(fullPath) as GameObject;
+        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (prefabInstance == null)
         {
             Debug.LogWarning("[SceneImporter] There is no prefab at path " + fullPath);
             return;
         }
 
         // Load and set children
-        SmallParserUtils.RecursiveParseTransformXml(root, prefab);
+        SmallParserUtils.RecursiveParseTransformXml(root, prefabInstance);
 
-        // Save and unload prefab asset
-        PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
-        PrefabUtility.UnloadPrefabContents(prefab);
+        // Save prefab asset
+        PrefabUtility.RecordPrefabInstancePropertyModifications(prefabInstance.GetComponent<Transform>());
+        PrefabUtility.ApplyPrefabInstance(prefabInstance, InteractionMode.AutomatedAction);
+
+        // Clean up
+        GameObject.DestroyImmediate(prefabInstance);
 
         // Force Unity to update the asset, without this we have to manually reload unity (by losing and gaining focus on the editor)
         AssetDatabase.ImportAsset(fullPath);

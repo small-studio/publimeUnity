@@ -84,50 +84,55 @@ public class SmallParserUtils
             for (int i = 0; i < childrenNodeList.Count; i++)
             {
                 string type = childrenNodeList[i].SelectSingleNode("Type").InnerText;
-                GameObject gameObject = null;
-                if (type == "MESH")
+                string name = childrenNodeList[i].SelectSingleNode("Name").InnerText;
+
+                GameObject gameObject = parent.transform.Find(name)?.gameObject;
+                if (gameObject == null)
                 {
-                    string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
-                    GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
-                    gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
-
-                    if (gameObject != null)
+                    if (type == "MESH")
                     {
-                        string isStatic = childrenNodeList[i].SelectSingleNode("Static").InnerText;
-                        gameObject.isStatic = (isStatic == "Static");
+                        string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
+                        GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+                        gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
 
-                        // Check if Layer is Valid and Set
-                        string layer = childrenNodeList[i].SelectSingleNode("Layer").InnerText;
-                        if (layer != "")
+                        if (gameObject != null)
                         {
-                            int layeridx = LayerMask.NameToLayer(layer);
-                            gameObject.layer = ((layeridx >= 0) ? layeridx : 0);
-                        }
+                            string isStatic = childrenNodeList[i].SelectSingleNode("Static").InnerText;
+                            gameObject.isStatic = (isStatic == "Static");
 
-                        // Check if Tag is Valid and Set
-                        string tag = childrenNodeList[i].SelectSingleNode("Tag").InnerText;
-                        if (tag != "")
-                        {
-                            for (int j = 0; j < UnityEditorInternal.InternalEditorUtility.tags.Length; j++)
+                            // Check if Layer is Valid and Set
+                            string layer = childrenNodeList[i].SelectSingleNode("Layer").InnerText;
+                            if (layer != "")
                             {
-                                if (UnityEditorInternal.InternalEditorUtility.tags[j].Contains(tag))
+                                int layeridx = LayerMask.NameToLayer(layer);
+                                gameObject.layer = ((layeridx >= 0) ? layeridx : 0);
+                            }
+
+                            // Check if Tag is Valid and Set
+                            string tag = childrenNodeList[i].SelectSingleNode("Tag").InnerText;
+                            if (tag != "")
+                            {
+                                for (int j = 0; j < UnityEditorInternal.InternalEditorUtility.tags.Length; j++)
                                 {
-                                    gameObject.tag = tag;
-                                    break;
+                                    if (UnityEditorInternal.InternalEditorUtility.tags[j].Contains(tag))
+                                    {
+                                        gameObject.tag = tag;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else if (type == "LIGHT" || type == "CAMERA")
-                {
-                    string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
-                    GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
-                    gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
-                }
-                else if (type == "EMPTY")
-                {
-                    gameObject = new GameObject();
+                    else if (type == "LIGHT" || type == "CAMERA")
+                    {
+                        string path = childrenNodeList[i].SelectSingleNode("Prefab").InnerText;
+                        GameObject child = AssetDatabase.LoadMainAssetAtPath(path) as GameObject;
+                        gameObject = PrefabUtility.InstantiatePrefab(child) as GameObject;
+                    }
+                    else if (type == "EMPTY")
+                    {
+                        gameObject = new GameObject();
+                    }
                 }
 
                 if (gameObject != null)

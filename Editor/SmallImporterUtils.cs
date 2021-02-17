@@ -25,6 +25,23 @@ public class SmallImporterUtils
         return null;
     }
 
+    public static bool PrefabExists(string fileName)
+    {
+        string[] results = AssetDatabase.FindAssets(fileName + " t:Prefab");
+        if (results != null && results.Length > 0)
+        {
+            foreach (var result in results)
+            {
+                string assetName = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(result));
+                if (assetName == fileName)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static void CreatePrefabFromXml(string xmlPath)
     {
         XmlDocument xml = new XmlDocument();
@@ -33,20 +50,26 @@ public class SmallImporterUtils
 
         string path = root.SelectSingleNode("Path").InnerText;
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
-        string fullPath = Path.Combine(path, fileName + ".prefab");
         
-        GameObject gameObject = new GameObject();
-        gameObject.name = fileName;
-
-        if (!Directory.Exists(path))
+        if (PrefabExists(fileName))
         {
-            Directory.CreateDirectory(path);
+            Debug.Log("[Small Importer] Prefab '" + fileName + "' already exists.");
         }
+        else
+        {
+            GameObject prefab = new GameObject();
+            prefab.name = fileName;
 
-        Debug.Log("[Small Importer] Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
-
-        PrefabUtility.SaveAsPrefabAsset(gameObject, Path.Combine(path, fileName + ".prefab"));
-        GameObject.DestroyImmediate(gameObject);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            
+            Debug.Log("[Small Importer] Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
+            
+            PrefabUtility.SaveAsPrefabAsset(prefab, Path.Combine(path, fileName + ".prefab"));
+            GameObject.DestroyImmediate(prefab);
+        }
     }
 
     public static Shader GetShaderFromName(string shaderName)

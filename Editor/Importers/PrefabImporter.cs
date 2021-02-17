@@ -48,8 +48,9 @@ class PrefabImporter : AAssetImporter
         string fullPath = Path.Combine(prefabPath, fileName + ".prefab");
 
         // Load the prefab asset
-        GameObject prefab = PrefabUtility.LoadPrefabContents(fullPath);
-        if (prefab == null)
+        GameObject prefab = AssetDatabase.LoadMainAssetAtPath(fullPath) as GameObject;
+        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (prefabInstance == null)
         {
             Debug.LogWarning("[PrefabImporter] There is no prefab at path " + fullPath);
             return;
@@ -58,8 +59,9 @@ class PrefabImporter : AAssetImporter
         // Load and assign the mesh
         string meshPath = root.SelectSingleNode("Model").InnerText + ".fbx";
         Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
-        MeshFilter meshFilter = prefab.AddComponent<MeshFilter>();
+        MeshFilter meshFilter = prefabInstance.GetOrAddComponent<MeshFilter>();
         meshFilter.mesh = mesh;
+        PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
 
         // Load and assign materials
         XmlNodeList materialsNode = root.SelectSingleNode("Materials").ChildNodes;
@@ -73,15 +75,19 @@ class PrefabImporter : AAssetImporter
             materials[i] = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
         }
 
-        MeshRenderer renderer = prefab.AddComponent<MeshRenderer>();
+        MeshRenderer renderer = prefabInstance.GetOrAddComponent<MeshRenderer>();
         renderer.sharedMaterials = materials;
+        PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
 
         // Load and set children
-        SmallParserUtils.RecursiveParseTransformXml(root, prefab);
+        SmallParserUtils.RecursiveParseTransformXml(root, prefabInstance);
 
-        // Save and unload prefab asset
-        PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
-        PrefabUtility.UnloadPrefabContents(prefab);
+        // Save prefab asset
+        PrefabUtility.RecordPrefabInstancePropertyModifications(prefabInstance.GetComponent<Transform>());
+        PrefabUtility.ApplyPrefabInstance(prefabInstance, InteractionMode.AutomatedAction);
+
+        // Clean up
+        GameObject.DestroyImmediate(prefabInstance);
 
         // Force Unity to update the asset, without this we have to manually reload unity (by losing and gaining focus on the editor)
         AssetDatabase.ImportAsset(fullPath);

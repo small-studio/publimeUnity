@@ -34,14 +34,15 @@ class CameraImporter : AAssetImporter
         string fullPath = Path.Combine(prefabPath, fileName + ".prefab");
 
         // Load the prefab asset
-        GameObject prefab = PrefabUtility.LoadPrefabContents(fullPath);
-        if (prefab == null)
+        GameObject prefab = AssetDatabase.LoadMainAssetAtPath(fullPath) as GameObject;
+        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (prefabInstance == null)
         {
             Debug.LogWarning("[PrefabImporter] There is no prefab at path " + fullPath);
             return;
         }
 
-        Camera camera = prefab.AddComponent<Camera>();
+        Camera camera = prefabInstance.GetOrAddComponent<Camera>();
 
         string projection = root.SelectSingleNode("Projection").InnerText;
         camera.orthographic = (projection != "PERSP");
@@ -58,9 +59,12 @@ class CameraImporter : AAssetImporter
         float size = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Size").InnerText);
         camera.orthographicSize = size * 0.28f;
 
-        // Save and unload prefab asset
-        PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
-        PrefabUtility.UnloadPrefabContents(prefab);
+        // Save prefab asset
+        PrefabUtility.RecordPrefabInstancePropertyModifications(camera);
+        PrefabUtility.ApplyPrefabInstance(prefabInstance, InteractionMode.AutomatedAction);
+
+        // Clean up
+        GameObject.DestroyImmediate(prefabInstance);
 
         // Force Unity to update the asset, without this we have to manually reload unity (by losing and gaining focus on the editor)
         AssetDatabase.ImportAsset(fullPath);

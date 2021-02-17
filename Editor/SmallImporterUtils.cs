@@ -32,8 +32,8 @@ public class SmallImporterUtils
         {
             foreach (var result in results)
             {
-                string assetName = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(result));
-                if (assetName == fileName)
+                string assetName = Path.GetFileName(AssetDatabase.GUIDToAssetPath(result));
+                if (assetName == fileName + ".prefab")
                 {
                     return true;
                 }

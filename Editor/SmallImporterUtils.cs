@@ -27,7 +27,7 @@ public class SmallImporterUtils
 
     public static bool PrefabExists(string fileName)
     {
-        string[] results = AssetDatabase.FindAssets(fileName + " t:Prefab");
+        string[] results = AssetDatabase.FindAssets(fileName);
         if (results != null && results.Length > 0)
         {
             foreach (var result in results)

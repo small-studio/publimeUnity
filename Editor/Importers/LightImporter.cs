@@ -41,12 +41,12 @@ class LightImporter : AAssetImporter
 
         // Load the prefab asset
         GameObject prefab = AssetDatabase.LoadMainAssetAtPath(fullPath) as GameObject;
-        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-        if (prefabInstance == null)
+        if (prefab == null)
         {
             Debug.LogWarning("[PrefabImporter] There is no prefab at path " + fullPath);
             return;
         }
+        GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
         Light light = prefabInstance.GetOrAddComponent<Light>();
 

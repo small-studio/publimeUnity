@@ -32,12 +32,14 @@ public class MaterialImporter : AAssetImporter
     static void InitSpecialValues()
     {
         _specialValues = new Dictionary<string, UnityAction<MaterialImporter, XmlNode, string>>();
-        _specialValues["_MainTex"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
-        _specialValues["_BaseMap"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
-        _specialValues["_UnlitColorMap"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
-        _specialValues["_MetallicGlossMap"] = (importer, channels, propName) => { importer.UseMetallicMap(importer.SetTexture(channels, propName)); };
-        _specialValues["_ParallaxMap"] = (importer, channels, propName) => { importer.SetKeyword("_PARALLAXMAP", importer.SetTexture(channels, propName)); };
-        _specialValues["_BumpMap"] = (importer, channels, propName) => { importer.SetKeyword("_NORMALMAP", importer.SetTexture(channels, propName)); };
+        _specialValues["_MainTex"] = (importer, channels, propName) => { importer.EnableMap("", "_UseColorMap", importer.SetTexture(channels, propName)); };
+        _specialValues["_BaseMap"] = (importer, channels, propName) => { importer.EnableMap("", "_UseColorMap", importer.SetTexture(channels, propName)); };
+        _specialValues["_UnlitColorMap"] = (importer, channels, propName) => { importer.EnableMap("", "_UseColorMap", importer.SetTexture(channels, propName)); };
+        _specialValues["_MetallicGlossMap"] = (importer, channels, propName) => { importer.EnableMap("_METALLICGLOSSMAP", "_UseMetalicMap", importer.SetTexture(channels, propName)); };
+        _specialValues["_SpecGlossMap"] = (importer, channels, propName) => { importer.EnableMap("_SPECGLOSSMAP", "", importer.SetTexture(channels, propName)); };
+        _specialValues["_ParallaxMap"] = (importer, channels, propName) => { importer.EnableMap("_PARALLAXMAP", "", importer.SetTexture(channels, propName)); };
+        _specialValues["_OcclusionMap"] = (importer, channels, propName) => { importer.EnableMap("_OCCLUSIONMAP", "", importer.SetTexture(channels, propName)); };
+        _specialValues["_BumpMap"] = (importer, channels, propName) => { importer.EnableMap("_NORMALMAP", "_UseNormalMap", importer.SetTexture(channels, propName)); };
         _specialValues["_EmissionMap"] = (importer, channels, propName) => { importer.UseEmission(importer.SetTexture(channels, propName), EmissionMode.Texture); };
         _specialValues["_EmissionColor"] = (importer, channels, propName) => { importer.UseEmission(importer.SetColor(channels, propName), EmissionMode.Color); };
         _specialValues["_Transparent"] = (importer, channels, propName) => { importer.SetTransparency(channels, propName); };
@@ -128,22 +130,23 @@ public class MaterialImporter : AAssetImporter
         }
     }
 
-    public void UseColorMap(bool enable)
+    public void EnableMap(string keywordName, string autodeskName, bool enable)
     {
-        _material.SetFloat("_UseColorMap", enable ? 1.0f : 0.0f); // URP Autodesk
-    }
-
-    public void UseMetallicMap(bool enable)
-    {
-        SetKeyword("_METALLICGLOSSMAP", enable);
-        _material.SetFloat("_UseMetalicMap", enable ? 1.0f : 0.0f); // URP Autodesk
+        if (!string.IsNullOrEmpty(keywordName))
+        {
+            SetKeyword(keywordName, enable);
+        }
+        if (!string.IsNullOrEmpty(autodeskName))
+        {
+            _material.SetFloat(autodeskName, enable ? 1.0f : 0.0f); // URP Autodesk
+        }
     }
 
     public void UseEmission(bool enable, EmissionMode mode)
     {
         if (_emissionMode == EmissionMode.None)
         {
-            SetKeyword("_EMISSION", enable);
+            EnableMap("_EMISSION", "_UseEmissiveMap", enable);
             if (enable)
             {
                 _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;

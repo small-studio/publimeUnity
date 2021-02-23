@@ -8,38 +8,28 @@ namespace SUBlime
 
 public class SmallParserUtils
 {
+    public static bool IsValidTextureXml(string sourceString)
+    {
+        Texture texture = null;
+        string[] splitString = sourceString.Split(',');
+        if (splitString.Length > 2 && splitString[0] == "Texture")
+        {
+            return !string.IsNullOrEmpty(splitString[2]);
+        }
+        return false;
+    }
+
     public static Texture ParseTextureXml(string sourceString)
     {
         Texture texture = null;
         string[] splitString = sourceString.Split(',');
-        if (splitString.Length > 2)
+        if (splitString.Length > 2 && splitString[0] == "Texture")
         {
             string type = splitString[1];
             string path = splitString[2];
             if (path != null)
             {
-                TextureImporter textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
-                if (textureImporter != null)
-                {
-                    textureImporter.textureType = TextureImporterType.Default;
-                    bool reimport = false;
-                    if (type == "NORMAL")
-                    {
-                        textureImporter.textureType = TextureImporterType.NormalMap;
-                        reimport = true;
-                    }
-                    else if (type == "TRANSPARENT")
-                    {
-                        textureImporter.alphaIsTransparency = true;
-                        reimport = true;
-                    }
-
-                    texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
-                    if (reimport)
-                    {
-                        //AssetDatabase.ImportAsset(path);
-                    }
-                }
+                texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
             }
         }
         return texture;

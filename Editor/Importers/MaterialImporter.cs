@@ -57,7 +57,7 @@ public class MaterialImporter : AAssetImporter
         {
             foreach (XmlNode node in channels.ChildNodes)
             {
-                if (node != null && SmallParserUtils.ParseTextureXml(node.InnerText))
+                if (node != null && SmallParserUtils.IsValidTextureXml(node.InnerText))
                 {
                     AddDependency<Texture>(SmallImporterUtils.GetTexturePath(node.InnerText));
                 }
@@ -132,6 +132,7 @@ public class MaterialImporter : AAssetImporter
 
     public void EnableMap(string keywordName, string autodeskName, bool enable)
     {
+        Debug.Log("EnableMap" + keywordName  + " - " + autodeskName + " - " + enable);
         if (!string.IsNullOrEmpty(keywordName))
         {
             SetKeyword(keywordName, enable);

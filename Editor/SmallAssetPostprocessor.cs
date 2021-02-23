@@ -65,6 +65,20 @@ class SmallAssetPostprocessor : AssetPostprocessor
             modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
         }
     }
+
+    void OnPreprocessTexture()
+    {
+        if (assetPath.Contains("_nrm"))
+        {
+            TextureImporter textureImporter = assetImporter as TextureImporter;
+            textureImporter.textureType = TextureImporterType.NormalMap;
+        }
+        else if (assetPath.Contains("_alpha"))
+        {
+            TextureImporter textureImporter = assetImporter as TextureImporter;
+            textureImporter.alphaIsTransparency = true;
+        }
+    }
 #endregion
 
 #region PostProcess

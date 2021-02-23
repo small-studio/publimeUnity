@@ -2,7 +2,6 @@
 using UnityEditor;
 using System.Xml;
 using System.Globalization;
-using System.IO;
 
 namespace SUBlime
 {
@@ -23,16 +22,23 @@ public class SmallParserUtils
                 if (textureImporter != null)
                 {
                     textureImporter.textureType = TextureImporterType.Default;
+                    bool reimport = false;
                     if (type == "NORMAL")
                     {
                         textureImporter.textureType = TextureImporterType.NormalMap;
+                        reimport = true;
                     }
                     else if (type == "TRANSPARENT")
                     {
                         textureImporter.alphaIsTransparency = true;
+                        reimport = true;
                     }
+
                     texture = AssetDatabase.LoadAssetAtPath(path, typeof(Texture)) as Texture;
-                    AssetDatabase.ImportAsset(path);
+                    if (reimport)
+                    {
+                        //AssetDatabase.ImportAsset(path);
+                    }
                 }
             }
         }

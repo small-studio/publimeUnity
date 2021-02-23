@@ -2,13 +2,46 @@
 using UnityEngine;
 using UnityEditor;
 using System.Xml;
+using UnityEngine.Events;
 
 namespace SUBlime
 {
 
-class MaterialImporter : AAssetImporter
+public class MaterialImporter : AAssetImporter
 {
     Material _material = null;
+    EmissionMode _emissionMode = EmissionMode.None;
+    static Dictionary<string, UnityAction<MaterialImporter, XmlNode, string>> _specialValues = null;
+
+    public enum EmissionMode
+    {
+        None,
+        Color,
+        Texture,
+        Both
+    }
+
+    public MaterialImporter()
+    {
+        if (_specialValues == null)
+        {
+            InitSpecialValues();
+        }
+    }
+
+    static void InitSpecialValues()
+    {
+        _specialValues = new Dictionary<string, UnityAction<MaterialImporter, XmlNode, string>>();
+        _specialValues["_MainTex"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
+        _specialValues["_BaseMap"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
+        _specialValues["_UnlitColorMap"] = (importer, channels, propName) => { importer.UseColorMap(importer.SetTexture(channels, propName)); };
+        _specialValues["_MetallicGlossMap"] = (importer, channels, propName) => { importer.UseMetallicMap(importer.SetTexture(channels, propName)); };
+        _specialValues["_ParallaxMap"] = (importer, channels, propName) => { importer.SetKeyword("_PARALLAXMAP", importer.SetTexture(channels, propName)); };
+        _specialValues["_BumpMap"] = (importer, channels, propName) => { importer.SetKeyword("_NORMALMAP", importer.SetTexture(channels, propName)); };
+        _specialValues["_EmissionMap"] = (importer, channels, propName) => { importer.UseEmission(importer.SetTexture(channels, propName), EmissionMode.Texture); };
+        _specialValues["_EmissionColor"] = (importer, channels, propName) => { importer.UseEmission(importer.SetColor(channels, propName), EmissionMode.Color); };
+        _specialValues["_Transparent"] = (importer, channels, propName) => { importer.SetTransparency(channels, propName); };
+    }
 
     public override void CreateDependencies(string assetPath)
     {
@@ -16,22 +49,16 @@ class MaterialImporter : AAssetImporter
         xml.Load(assetPath);
         XmlNode root = xml.DocumentElement;
 
-        List<string> textures = new List<string>();
-        textures.Add("_MainTex");
-        textures.Add("_MetallicGlossMap");
-        textures.Add("_SpecGlossMap");
-        textures.Add("_BumpMap");
-        textures.Add("_EmissionMap");
-        textures.Add("_Lightmap");
-
         // Add textures dependencies
         XmlNode channels = root.SelectSingleNode("Channels");
-        foreach (string texture in textures)
+        if (channels != null)
         {
-            XmlNode node = channels.SelectSingleNode(texture);
-            if (node != null)
+            foreach (XmlNode node in channels.ChildNodes)
             {
-                AddDependency<Texture>(SmallImporterUtils.GetTexturePath(node.InnerText));
+                if (node != null && SmallParserUtils.ParseTextureXml(node.InnerText))
+                {
+                    AddDependency<Texture>(SmallImporterUtils.GetTexturePath(node.InnerText));
+                }
             }
         }
     }
@@ -41,148 +68,137 @@ class MaterialImporter : AAssetImporter
         _material = SmallImporterUtils.CreateMaterialFromXml(assetPath);
     }
 
-    public override void OnPostImport(string assetPath)
+    public bool SetTexture(XmlNode channels, string textureName)
     {
-        XmlDocument xml = new XmlDocument();
-        xml.Load(assetPath);
-        XmlNode root = xml.DocumentElement;
-
-        // Get Data from Channels when available
-        XmlNode channels = root.SelectSingleNode("Channels");
-
-        // Custom parameters
-        XmlNode custom = channels.SelectSingleNode("Custom");
-        if (custom != null)
+        XmlNode nodeXml = channels.SelectSingleNode(textureName);
+        if (nodeXml != null)
         {
-            XmlNode name = custom.SelectSingleNode("Name");
-            if (name != null)
-            {
-                Shader shader = SmallImporterUtils.GetShaderFromName(name.InnerText);
-                if (shader != null)
-                {
-                    _material.shader = shader;
-                    foreach (XmlNode node in custom.ChildNodes)
-                    {
-                        ParseFactory.Parse(node.InnerText, node.Name, _material);
-                    }
-                }
-            }
+            Texture texture = SmallParserUtils.ParseTextureXml(nodeXml.InnerText);
+            _material.SetTexture(textureName, texture);
+            return texture != null;
         }
+        return false;
+    }
 
-        // Base Color
-        XmlNode colorXml = channels.SelectSingleNode("_Color");
-        if (colorXml != null)
+    public bool SetColor(XmlNode channels, string valueName)
+    {
+        XmlNode nodeXml = channels.SelectSingleNode(valueName);
+        if (nodeXml != null)
         {
-            Color color = SmallParserUtils.ParseColorXml(colorXml.InnerText);
-            _material.SetColor("_Color", color);
-            _material.SetColor("_BaseColor", color); // URP Unlit
-            _material.SetColor("_UnlitColor", color); // HDRP Unlit
+            Color color = SmallParserUtils.ParseColorXml(nodeXml.InnerText);
+            _material.SetColor(valueName, color);
+            return color != Color.black;
         }
+        return false;
+    }
 
-        // Albedo
-        XmlNode mainTexXml = channels.SelectSingleNode("_MainTex");
-        if (mainTexXml != null)
+    public bool SetVector(XmlNode channels, string valueName)
+    {
+        XmlNode nodeXml = channels.SelectSingleNode(valueName);
+        if (nodeXml != null)
         {
-            Texture texture = SmallParserUtils.ParseTextureXml(mainTexXml.InnerText);
-            _material.SetTexture("_MainTex", texture);
-            _material.SetTexture("_BaseMap", texture); // URP Unlit
-            _material.SetTexture("_UnlitColorMap", texture); //HDRP Unlit
-            _material.SetFloat("_UseColorMap", texture != null ? 1.0f : 0.0f);
+            Vector3 vector = SmallParserUtils.ParseVectorXml(nodeXml.InnerText);
+            _material.SetVector(valueName, vector);
+            return true;
         }
+        return false;
+    }
 
-        // Metallic
-        XmlNode metallicGlossMapXml = channels.SelectSingleNode("_MetallicGlossMap");
-        if (metallicGlossMapXml != null)
+    public bool SetFloat(XmlNode channels, string valueName)
+    {
+        XmlNode nodeXml = channels.SelectSingleNode(valueName);
+        if (nodeXml != null)
         {
-            Texture texture = SmallParserUtils.ParseTextureXml(metallicGlossMapXml.InnerText);
-
-            _material.EnableKeyword("_METALLICGLOSSMAP");
-            if (texture)
-            {
-                _material.SetTexture("_MetallicGlossMap", texture);
-                _material.SetFloat("_UseMetalicMap", 1.0f); // URP Autodesk
-            }
-            else
-            {
-                XmlNode metallicXml = channels.SelectSingleNode("_Metallic");
-                if (metallicXml != null)
-                {
-                    float value = SmallParserUtils.ParseFloatXml(metallicXml.InnerText);
-                    _material.SetTexture("_MetallicGlossMap", null);
-                    _material.SetFloat("_Metallic", value);
-                    _material.SetFloat("_UseMetalicMap", 0.0f); // URP Autodesk
-                }
-            }
+            float value = SmallParserUtils.ParseFloatXml(nodeXml.InnerText);
+            _material.SetFloat(valueName, value);
+            return true;
         }
+        return false;
+    }
 
-        // Roughness
-        XmlNode specMapXml = channels.SelectSingleNode("_SpecGlossMap");
-        if (specMapXml != null)
+    public void SetKeyword(string keyword, bool enabled)
+    {
+        if (enabled)
         {
-            _material.EnableKeyword("_SPECGLOSSMAP");
-            Texture texture = SmallParserUtils.ParseTextureXml(specMapXml.InnerText);
-            if (texture)
-            {
-                _material.SetTexture("_SpecGlossMap", texture);
-                _material.SetFloat("_UseRoughnessMap", 1.0f); // URP Autodesk
-            }
-            else
-            {
-                XmlNode glossinessXml = channels.SelectSingleNode("_Glossiness");
-                if (glossinessXml != null)
-                {
-                    float value = SmallParserUtils.ParseFloatXml(glossinessXml.InnerText);
-                    _material.SetTexture("_SpecGlossMap", null);
-                    _material.SetFloat("_Glossiness", value);
-                    _material.SetFloat("_UseRoughnessMap", 0.0f); // URP Autodesk
-                }
-            }
+            _material.EnableKeyword(keyword);
         }
-
-        // Normal Map
-        XmlNode bumpMapXml = channels.SelectSingleNode("_BumpMap");
-        if (bumpMapXml != null)
+        else
         {
-            _material.EnableKeyword("_NORMALMAP");
-            Texture texture = SmallParserUtils.ParseTextureXml(bumpMapXml.InnerText);
-            _material.SetTexture("_BumpMap", texture);
+            _material.DisableKeyword(keyword);
         }
+    }
 
-        // Emission
-        XmlNode emissionMapXml = channels.SelectSingleNode("_EmissionMap");
-        if (emissionMapXml != null)
+    public void UseColorMap(bool enable)
+    {
+        _material.SetFloat("_UseColorMap", enable ? 1.0f : 0.0f); // URP Autodesk
+    }
+
+    public void UseMetallicMap(bool enable)
+    {
+        SetKeyword("_METALLICGLOSSMAP", enable);
+        _material.SetFloat("_UseMetalicMap", enable ? 1.0f : 0.0f); // URP Autodesk
+    }
+
+    public void UseEmission(bool enable, EmissionMode mode)
+    {
+        if (_emissionMode == EmissionMode.None)
         {
-            Texture texture = SmallParserUtils.ParseTextureXml(emissionMapXml.InnerText);
-            if (texture)
+            SetKeyword("_EMISSION", enable);
+            if (enable)
             {
-                _material.EnableKeyword("_EMISSION");
                 _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
-                _material.SetTexture("_EmissionMap", texture);
-                _material.SetColor("_EmissionColor", Color.white);
+                _emissionMode = mode;
+            }
+            else
+            {
+                _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
             }
         }
         else
         {
-            Color color = Color.black;
-            XmlNode emissionColorXml = channels.SelectSingleNode("_EmissionColor");
-            if (emissionColorXml != null)
-            {
-                color = SmallParserUtils.ParseColorXml(emissionColorXml.InnerText);
-            }
-            if (color != Color.black)
-            {
-                _material.EnableKeyword("_EMISSION");
-                _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
-                _material.SetColor("_EmissionColor", color);
-                _material.SetTexture("_EmissionMap", null);
-            }
-            else
-            {
-                _material.DisableKeyword("_EMISSION");
-                _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-            }
+            _emissionMode = EmissionMode.Both;
         }
+    }
 
+    public void SetTransparency(XmlNode channels, string propName)
+    {
+        XmlNode transparentXml = channels.SelectSingleNode("_Transparent");
+        if (transparentXml != null)
+        {
+            string value = transparentXml.InnerText;
+            float mode = 0.0f;
+            float threshold = 0.5f;
+            if (value == "OPAQUE")
+            {
+                mode = 0.0f;
+            }
+            else if (value == "CLIP")
+            {
+                mode = 1.0f;
+                XmlNode clipThresholdXml = channels.SelectSingleNode("_Cutoff");
+                if (clipThresholdXml != null)
+                {
+                    threshold = SmallParserUtils.ParseFloatXml(clipThresholdXml.InnerText);
+                }
+            }
+            else if (value == "BLEND")
+            {
+                mode = 2.0f;
+            }
+
+            // _Mode is for standard shaders
+            _material.SetFloat("_Mode", mode);
+
+            // Surface is for URP
+            // Set surface to 1 if transparent
+            _material.SetFloat("_Surface", mode > 0.0f ? 1.0f : 0.0f);
+            _material.SetFloat("_AlphaClip", mode == 1.0f ? 1.0f : 0.0f);
+            _material.SetFloat("_Cutoff", threshold);
+        }
+    }
+
+    public void SetLightmap(XmlNode channels, string propName)
+    {
         // Tile and lightmap data
         XmlNode tileMaxXml = channels.SelectSingleNode("_TileMax");
         if (tileMaxXml != null)
@@ -203,40 +219,51 @@ class MaterialImporter : AAssetImporter
                 _material.SetTexture("_Lightmap", texture);
             }
         }
+    }
 
-        // Transparent
-        XmlNode transparentXml = channels.SelectSingleNode("_Transparent");
-        if (transparentXml != null)
+    public void SetMaterialValue(XmlNode channels, string propertyName, string input)
+    {
+        string type = input.Split(',')[0];
+        if (type == "Float")
         {
-            string value = transparentXml.InnerText;
-            float mode = 0.0f;
-            float threshold = 0.5f;
-            if (value == "OPAQUE")
+            SetFloat(channels, propertyName);
+        }
+        else if (type == "Vector")
+        {
+            SetVector(channels, propertyName);
+        }
+        else if (type == "Color")
+        {
+            SetColor(channels, propertyName);
+        }
+        else if (type == "Texture")
+        {
+            SetTexture(channels, propertyName);
+        }
+    }
+
+    public override void OnPostImport(string assetPath)
+    {
+        XmlDocument xml = new XmlDocument();
+        xml.Load(assetPath);
+        XmlNode root = xml.DocumentElement;
+
+        // Get Data from Channels when available
+        XmlNode channels = root.SelectSingleNode("Channels");
+        if (channels != null)
+        {
+            foreach (XmlNode node in channels.ChildNodes)
             {
-                mode = 0.0f;
-            }
-            else if (value == "CLIP")
-            {
-                mode = 1.0f;
-                XmlNode clipThresholdXml = channels.SelectSingleNode("_ClipThreshold");
-                if (clipThresholdXml != null)
+                if (_specialValues.ContainsKey(node.Name))
                 {
-                    threshold = SmallParserUtils.ParseFloatXml(clipThresholdXml.InnerText);
-                    Debug.Log("threshold" + clipThresholdXml.InnerText);
+                    Debug.Log("Special value" + node.Name);
+                    _specialValues[node.Name].Invoke(this, channels, node.Name);
+                }
+                else
+                {
+                    SetMaterialValue(channels, node.Name, node.InnerText);
                 }
             }
-            else if (value == "BLEND")
-            {
-                mode = 2.0f;
-            }
-            // _Mode is for standard shaders
-            _material.SetFloat("_Mode", mode);
-
-            // Surface is for URP
-            // Set surface to 1 if transparent
-            _material.SetFloat("_Surface", mode > 0.0f ? 1.0f : 0.0f);
-            _material.SetFloat("_AlphaClip", mode == 1.0f ? 1.0f : 0.0f);
-            _material.SetFloat("_Cutoff", threshold);
         }
 
         EditorUtility.SetDirty(_material);

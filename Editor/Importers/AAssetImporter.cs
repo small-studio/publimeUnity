@@ -22,13 +22,31 @@ public abstract class AAssetImporter
         {
             return AssetDatabase.LoadAssetAtPath(_assetPath, _assetType) != null;
         }
+
+        public bool IsEqual(AssetDependency dependency)
+        {
+            return _assetPath == dependency._assetPath;
+        }
     }
 
     List<AssetDependency> _dependencies = new List<AssetDependency>();
 
     public void AddDependency<T>(string assetPath)
     {
-        _dependencies.Add(new AssetDependency(assetPath, typeof(T)));
+        bool duplicate = false;
+        AssetDependency newDependency = new AssetDependency(assetPath, typeof(T));
+        foreach (AssetDependency dependency in _dependencies)
+        {
+            if (dependency.IsEqual(newDependency))
+            {
+                duplicate = true;
+            }
+        }
+
+        if (!duplicate)
+        {
+            _dependencies.Add(newDependency);
+        }
     }
 
     public bool CanLoadDependencies()

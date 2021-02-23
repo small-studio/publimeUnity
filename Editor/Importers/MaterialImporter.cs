@@ -132,7 +132,6 @@ public class MaterialImporter : AAssetImporter
 
     public void EnableMap(string keywordName, string autodeskName, bool enable)
     {
-        Debug.Log("EnableMap" + keywordName  + " - " + autodeskName + " - " + enable);
         if (!string.IsNullOrEmpty(keywordName))
         {
             SetKeyword(keywordName, enable);
@@ -260,7 +259,6 @@ public class MaterialImporter : AAssetImporter
             {
                 if (_specialValues.ContainsKey(node.Name))
                 {
-                    Debug.Log("Special value" + node.Name);
                     _specialValues[node.Name].Invoke(this, channels, node.Name);
                 }
                 else

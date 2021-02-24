@@ -92,7 +92,6 @@ public class SmallImporterUtils
         xml.Load(xmlPath);
         XmlNode root = xml.DocumentElement;
 
-        string shaderName = root.SelectSingleNode("Shader").InnerText;
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
         string path = Path.Combine(root.SelectSingleNode("Path").InnerText, fileName + ".mat");
 
@@ -105,7 +104,19 @@ public class SmallImporterUtils
             material = new Material(Shader.Find("Standard"));
             AssetDatabase.CreateAsset(material, path);
         }
-        
+
+        // Try to set the shader
+        XmlNode shaderNode = root.SelectSingleNode("Shader");
+        string shaderName = "Standard";
+        if (shaderNode != null)
+        {
+            shaderName = root.SelectSingleNode("Shader").InnerText;
+        }
+        else
+        {
+            Debug.LogWarning("[Small Importer] Shader name not found in material '" + fileName + "'. The material is probably missing a group node.");
+        }
+
         Shader shader = GetShaderFromName(shaderName);
         if (shader != null)
         {

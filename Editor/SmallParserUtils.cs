@@ -10,7 +10,6 @@ public class SmallParserUtils
 {
     public static bool IsValidTextureXml(string sourceString)
     {
-        Texture texture = null;
         string[] splitString = sourceString.Split(',');
         if (splitString.Length > 2 && splitString[0] == "Texture")
         {

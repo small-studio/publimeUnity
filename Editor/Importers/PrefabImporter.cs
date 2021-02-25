@@ -71,19 +71,22 @@ class PrefabImporter : AAssetImporter
 
         // Load and assign materials
         XmlNodeList materialsNode = root.SelectSingleNode("Materials").ChildNodes;
-        Material[] materials = new Material[materialsNode.Count];
-        for (int i = 0; i < materialsNode.Count; i++)
+        if (materialsNode.Count != 0)
         {
-            string path = materialsNode[i].SelectSingleNode("Path").InnerText;
-            string name = materialsNode[i].SelectSingleNode("Name").InnerText;
-            string materialPath = Path.Combine(path, name + ".mat");
+            Material[] materials = new Material[materialsNode.Count];
+            for (int i = 0; i < materialsNode.Count; i++)
+            {
+                string path = materialsNode[i].SelectSingleNode("Path").InnerText;
+                string name = materialsNode[i].SelectSingleNode("Name").InnerText;
+                string materialPath = Path.Combine(path, name + ".mat");
 
-            materials[i] = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                materials[i] = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            }
+
+            MeshRenderer renderer = prefabInstance.GetOrAddComponent<MeshRenderer>();
+            renderer.sharedMaterials = materials;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
         }
-
-        MeshRenderer renderer = prefabInstance.GetOrAddComponent<MeshRenderer>();
-        renderer.sharedMaterials = materials;
-        PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
 
         // Load and set children
         SmallParserUtils.RecursiveParseTransformXml(root, prefabInstance);

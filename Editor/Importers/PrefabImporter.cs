@@ -70,6 +70,7 @@ class PrefabImporter : AAssetImporter
         PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
 
         // Load and assign materials
+        MeshRenderer renderer = prefabInstance.GetOrAddComponent<MeshRenderer>();
         XmlNodeList materialsNode = root.SelectSingleNode("Materials").ChildNodes;
         if (materialsNode.Count != 0)
         {
@@ -83,7 +84,6 @@ class PrefabImporter : AAssetImporter
                 materials[i] = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
             }
 
-            MeshRenderer renderer = prefabInstance.GetOrAddComponent<MeshRenderer>();
             renderer.sharedMaterials = materials;
             PrefabUtility.RecordPrefabInstancePropertyModifications(renderer);
         }

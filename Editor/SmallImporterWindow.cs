@@ -28,6 +28,12 @@ public class SmallImporterWindow : EditorWindow
         GUILayout.Label("Small Importer:", EditorStyles.boldLabel);
         prefixPrefab = EditorGUILayout.TextField("Prefix Identification", prefixPrefab);
 
+        if (GUILayout.Button("Refresh SUBlime"))
+        {
+            Debug.Log("Sublime refreshed.");
+            SmallAssetPostprocessor.Reset();
+        }
+
         // Save in EditorPlayerPrefs
         EditorPrefs.SetString("SBI_prefixPrefab", prefixPrefab);
     }

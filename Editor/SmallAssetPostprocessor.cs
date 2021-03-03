@@ -10,6 +10,11 @@ class SmallAssetPostprocessor : AssetPostprocessor
 {
     static Dictionary<string, AAssetImporter> _importers = new Dictionary<string, AAssetImporter>();
 
+    public static void Reset()
+    {
+        _importers.Clear();
+    }
+
     AAssetImporter GetAssetImporter(string path)
     {
         if (path.EndsWith(SmallImporterUtils.SMALL_MATERIAL_EXTENSION))

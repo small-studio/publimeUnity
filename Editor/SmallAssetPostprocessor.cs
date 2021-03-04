@@ -50,13 +50,13 @@ class SmallAssetPostprocessor : AssetPostprocessor
             if (!_importers.ContainsKey(assetPath))
             {
                 importer.CreateDependencies(assetPath);
-                Debug.Log("[OnPreprocessAsset] Importing asset: " + assetPath + " with " + importer.DependencyCount + (importer.DependencyCount == 1 ? " dependency" : " dependencies"));
+                SmallLogger.Log(SmallLogger.LogType.AssetPostProcessor, "Importing asset: " + Path.GetFileName(assetPath) + " with " + importer.DependencyCount + (importer.DependencyCount == 1 ? " dependency" : " dependencies"));
                 importer.OnPreImport(assetPath);
                 _importers.Add(assetPath, importer);
             }
             else
             {
-                Debug.LogError("Asset already in the list : " + assetPath);
+                SmallLogger.LogError(SmallLogger.LogType.AssetPostProcessor, "Asset already in the list : " + assetPath);
             }
         }
     }
@@ -95,7 +95,7 @@ class SmallAssetPostprocessor : AssetPostprocessor
         {
             if (item.Value.CanLoadDependencies())
             {
-                Debug.Log("[OnPostprocessAsset] Post import asset: " + item.Key);
+                SmallLogger.Log(SmallLogger.LogType.AssetPostProcessor, "Post import asset: " + item.Key);
                 item.Value.OnPostImport(item.Key);
                 toDelete.Add(item.Key);
             }
@@ -107,7 +107,11 @@ class SmallAssetPostprocessor : AssetPostprocessor
             _importers.Remove(key);
         }
 
-        Debug.Log(_importers.Count + " asset(s) waiting for dependencies");
+        SmallLogger.Log(SmallLogger.LogType.Dependency, _importers.Count + " asset(s) waiting for dependencies");
+        foreach (KeyValuePair<string, AAssetImporter> item in _importers)
+        {
+            SmallLogger.Log(SmallLogger.LogType.Dependency, Path.GetFileName(item.Key) + " -> " + item.Value.ToString());
+        }
     }
 #endregion
 }

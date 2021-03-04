@@ -54,7 +54,7 @@ public class SmallImporterUtils
         
         if (PrefabExists(fileName))
         {
-            Debug.Log("[Small Importer] Prefab '" + fileName + "' already exists.");
+            SmallLogger.Log(SmallLogger.LogType.PreImport, "Prefab '" + fileName + "' already exists.");
         }
         else
         {
@@ -66,7 +66,7 @@ public class SmallImporterUtils
                 Directory.CreateDirectory(path);
             }
             
-            Debug.Log("[Small Importer] Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
+            SmallLogger.Log(SmallLogger.LogType.PreImport, "Creating prefab '" + fileName + "' from xml '" + xmlPath + "'");
             
             PrefabUtility.SaveAsPrefabAsset(prefab, fullPath);
             GameObject.DestroyImmediate(prefab);
@@ -81,7 +81,7 @@ public class SmallImporterUtils
         Shader shader = Shader.Find(shaderName);
         if (shader == null)
         {
-            Debug.LogWarning("The shader \"" + shaderName + "\" does not exists.");
+            SmallLogger.LogWarning(SmallLogger.LogType.PreImport, "The shader \"" + shaderName + "\" does not exists.");
         }
         return shader;
     }
@@ -114,18 +114,18 @@ public class SmallImporterUtils
         }
         else
         {
-            Debug.LogWarning("[Small Importer] Shader name not found in material '" + fileName + "'. The material is probably missing a group node.");
+            SmallLogger.LogWarning(SmallLogger.LogType.PreImport, "Shader name not found in material '" + fileName + "'. The material is probably missing a group node.");
         }
 
         Shader shader = GetShaderFromName(shaderName);
         if (shader != null)
         {
             material.shader = shader;
-            Debug.Log("[Small Importer] " + (isCreating ? "Creating" : "Loading") + " material '" + fileName + "' from xml '" + xmlPath + "' using shader '" + shaderName + "'");
+            SmallLogger.Log(SmallLogger.LogType.PreImport, (isCreating ? "Creating" : "Loading") + " material '" + fileName + "' from xml '" + xmlPath + "' using shader '" + shaderName + "'");
         }
         else
         {
-            Debug.Log("[Small Importer] " + (isCreating ? "Creating" : "Loading") + " material '" + fileName + "'from xml '" + xmlPath + "'. Shader name is invalid '" + shaderName + "'");
+            SmallLogger.Log(SmallLogger.LogType.PreImport, (isCreating ? "Creating" : "Loading") + " material '" + fileName + "'from xml '" + xmlPath + "'. Shader name is invalid '" + shaderName + "'");
         }
 
         return material;

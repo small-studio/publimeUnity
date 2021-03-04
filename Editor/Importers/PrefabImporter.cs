@@ -57,7 +57,7 @@ class PrefabImporter : AAssetImporter
         GameObject prefab = AssetDatabase.LoadMainAssetAtPath(fullPath) as GameObject;
         if (prefab == null)
         {
-            Debug.LogWarning("[PrefabImporter] There is no prefab at path " + fullPath);
+            SmallLogger.LogWarning(SmallLogger.LogType.PostImport, "There is no prefab at path " + fullPath);
             return;
         }
         GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;

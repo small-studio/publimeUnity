@@ -27,6 +27,11 @@ public abstract class AAssetImporter
         {
             return _assetPath == dependency._assetPath;
         }
+
+        public override string ToString()
+        {
+            return System.IO.Path.GetFileName(_assetPath) + " (" + _assetType.ToString() + ")";
+        }
     }
 
     List<AssetDependency> _dependencies = new List<AssetDependency>();
@@ -45,6 +50,7 @@ public abstract class AAssetImporter
 
         if (!duplicate)
         {
+            SmallLogger.Log(SmallLogger.LogType.Dependency, "Add dependency '" + newDependency.ToString() + "' for asset '" + System.IO.Path.GetFileName(assetPath) + "'"); 
             _dependencies.Add(newDependency);
         }
     }
@@ -64,6 +70,16 @@ public abstract class AAssetImporter
     public int DependencyCount
     {
         get { return _dependencies.Count; }
+    }
+
+    public override string ToString()
+    {
+        string s = "";
+        foreach (AssetDependency dep in _dependencies)
+        {
+            s += dep.ToString();
+        }
+        return s;
     }
 
     public abstract void CreateDependencies(string assetPath);

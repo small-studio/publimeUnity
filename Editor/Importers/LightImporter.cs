@@ -55,12 +55,13 @@ class LightImporter : AAssetImporter
         if (type == "POINT")
         {
             light.type = LightType.Point;
+            light.range = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Radius").InnerText);
         }
         else if (type == "SPOT")
         {
-            float spotSize = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("SpotSize").InnerText);
-            light.spotAngle = spotSize;
             light.type = LightType.Spot;
+            light.spotAngle = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("SpotSize").InnerText);
+            light.range = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Radius").InnerText);
         }
         else if (type == "SUN")
         {
@@ -85,12 +86,8 @@ class LightImporter : AAssetImporter
         }
 
         // Light color
-        Color color = SmallParserUtils.ParseColorXml(root.SelectSingleNode("Color").InnerText);
-        light.color = color;
-
-        float power = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Power").InnerText);
-        light.intensity = power;
-        light.range = power / 3.0f;
+        light.color = SmallParserUtils.ParseColorXml(root.SelectSingleNode("Color").InnerText);
+        light.intensity = SmallParserUtils.ParseFloatXml(root.SelectSingleNode("Power").InnerText) / 100.0f;
 
         // Save prefab asset
         PrefabUtility.RecordPrefabInstancePropertyModifications(light);

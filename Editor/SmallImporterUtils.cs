@@ -95,16 +95,6 @@ public class SmallImporterUtils
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
         string path = Path.Combine(root.SelectSingleNode("Path").InnerText, fileName + ".mat");
 
-        // If the material does not exists, we create it
-        bool isCreating = false;
-        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
-        if (material == null)
-        {
-            isCreating = true;
-            material = new Material(Shader.Find("Standard"));
-            AssetDatabase.CreateAsset(material, path);
-        }
-
         // Try to set the shader
         XmlNode shaderNode = root.SelectSingleNode("Shader");
         string shaderName = "Standard";
@@ -118,14 +108,17 @@ public class SmallImporterUtils
         }
 
         Shader shader = GetShaderFromName(shaderName);
-        if (shader != null)
+
+        // If the material does not exists, we create it
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
         {
-            material.shader = shader;
-            SmallLogger.Log(SmallLogger.LogType.PreImport, (isCreating ? "Creating" : "Loading") + " material '" + fileName + "' from xml '" + xmlPath + "' using shader '" + shaderName + "'");
+            material = new Material(shader);
+            AssetDatabase.CreateAsset(material, path);
         }
         else
         {
-            SmallLogger.Log(SmallLogger.LogType.PreImport, (isCreating ? "Creating" : "Loading") + " material '" + fileName + "'from xml '" + xmlPath + "'. Shader name is invalid '" + shaderName + "'");
+            material.shader = shader;
         }
 
         return material;

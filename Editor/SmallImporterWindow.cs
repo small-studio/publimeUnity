@@ -23,6 +23,11 @@ public class SmallImporterWindow : EditorWindow
 
     void Awake()
     {
+        LoadOptions();
+    }
+
+    static void LoadOptions()
+    {
         materialImportMode = Enum.Parse<ModelImporterMaterialImportMode>(EditorPrefs.GetString("SBI_materialImportMode", prefixPrefab), true);
         logMask = (SmallLogger.LogType)EditorPrefs.GetInt("SBI_log", (int)logMask);
     }
@@ -58,6 +63,12 @@ public class SmallImporterWindow : EditorWindow
         // Save in EditorPlayerPrefs
         EditorPrefs.SetString("SBI_materialImportMode", materialImportMode.ToString());
         EditorPrefs.SetInt("SBI_log", (int)logMask);
+    }
+
+    [UnityEditor.Callbacks.DidReloadScripts]
+    private static void CreateAssetWhenReady()
+    {
+        SmallImporterWindow.LoadOptions();
     }
 }
 

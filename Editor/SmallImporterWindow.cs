@@ -41,6 +41,22 @@ public class SmallImporterWindow : EditorWindow
             SmallAssetPostprocessor.Reset();
         }
 
+        GUILayout.BeginHorizontal();
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = Color.white;
+        GUILayout.Label("Status: ", style, GUILayout.ExpandWidth(false));
+        if (SmallAssetPostprocessor.hasMissingDependencies)
+        {
+            style.normal.textColor = Color.red;
+            GUILayout.Label("Missing dependencies", style);
+        }
+        else
+        {
+            style.normal.textColor = Color.green;
+            GUILayout.Label("All good", style);
+        }
+        GUILayout.EndHorizontal();
+
         // Save in EditorPlayerPrefs
         EditorPrefs.SetString("SBI_prefixPrefab", prefixPrefab);
         EditorPrefs.SetString("SBI_materialImportMode", materialImportMode.ToString());

@@ -9,6 +9,7 @@ namespace SUBlime
 class SmallAssetPostprocessor : AssetPostprocessor
 {
     static Dictionary<string, AAssetImporter> _importers = new Dictionary<string, AAssetImporter>();
+    static public bool hasMissingDependencies => _importers.Count != 0;
 
     public static void Reset()
     {

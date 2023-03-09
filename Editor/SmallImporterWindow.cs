@@ -10,6 +10,7 @@ public class SmallImporterWindow : EditorWindow
     public static string prefixPrefab = "_";
     public static SmallLogger.LogType logMask;
     public static ModelImporterMaterialImportMode materialImportMode = ModelImporterMaterialImportMode.None;
+    public static Shader defaultShader = null;
 
     [MenuItem("Window/Small Importer")]
     static void Init()
@@ -30,6 +31,7 @@ public class SmallImporterWindow : EditorWindow
     {
         materialImportMode = Enum.Parse<ModelImporterMaterialImportMode>(EditorPrefs.GetString("SBI_materialImportMode", prefixPrefab), true);
         logMask = (SmallLogger.LogType)EditorPrefs.GetInt("SBI_log", (int)logMask);
+        defaultShader = Shader.Find(EditorPrefs.GetString("SBI_defaultShader", ""));
     }
 
     void OnGUI()
@@ -37,6 +39,7 @@ public class SmallImporterWindow : EditorWindow
         GUILayout.Label("Small Importer:", EditorStyles.boldLabel);
         materialImportMode = (ModelImporterMaterialImportMode)EditorGUILayout.EnumPopup("Material import mode", materialImportMode);
         logMask = (SmallLogger.LogType)EditorGUILayout.MaskField("Log", (int)logMask, Enum.GetNames(typeof(SmallLogger.LogType)));
+        defaultShader = (Shader)EditorGUILayout.ObjectField("Default shader", defaultShader, typeof(Shader), false);
 
         if (GUILayout.Button("Refresh SUBlime"))
         {
@@ -63,6 +66,7 @@ public class SmallImporterWindow : EditorWindow
         // Save in EditorPlayerPrefs
         EditorPrefs.SetString("SBI_materialImportMode", materialImportMode.ToString());
         EditorPrefs.SetInt("SBI_log", (int)logMask);
+        EditorPrefs.SetString("SBI_defaultShader", defaultShader != null ? defaultShader.name : "");
     }
 
     [UnityEditor.Callbacks.DidReloadScripts]

@@ -97,7 +97,7 @@ public class SmallImporterUtils
 
         // Try to set the shader
         XmlNode shaderNode = root.SelectSingleNode("Shader");
-        string shaderName = "Standard";
+        string shaderName = SmallImporterWindow.defaultShader != null ? SmallImporterWindow.defaultShader.name : "Standard";
         if (shaderNode != null)
         {
             shaderName = root.SelectSingleNode("Shader").InnerText;

@@ -67,7 +67,9 @@ class SmallAssetPostprocessor : AssetPostprocessor
         {
             // Don't import materials for models
             ModelImporter modelImporter = assetImporter as ModelImporter;
-            modelImporter.materialImportMode = ModelImporterMaterialImportMode.None;
+            modelImporter.materialImportMode = SmallImporterWindow.materialImportMode;
+            modelImporter.materialLocation = ModelImporterMaterialLocation.External;
+            modelImporter.materialName = ModelImporterMaterialName.BasedOnMaterialName;
         }
     }
 

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using UnityEditor.PackageManager;
+using System.Collections;
 
 namespace SUBlime
 {
@@ -11,6 +13,7 @@ public class SmallImporterWindow : EditorWindow
     public static SmallLogger.LogType logMask;
     public static ModelImporterMaterialImportMode materialImportMode = ModelImporterMaterialImportMode.None;
     public static Shader defaultShader = null;
+    public static string version = "1.9.1";
 
     [MenuItem("Window/Small Importer")]
     static void Init()
@@ -62,6 +65,12 @@ public class SmallImporterWindow : EditorWindow
             GUILayout.Label("All good", style);
         }
         GUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        style.normal.textColor = Color.gray;
+        GUILayout.Label("Version: " + version, style);
+        EditorGUILayout.EndHorizontal();
 
         // Save in EditorPlayerPrefs
         EditorPrefs.SetString("SBI_materialImportMode", materialImportMode.ToString());

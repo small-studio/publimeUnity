@@ -1,9 +1,9 @@
 {
   "name": "com.small.sublime",
-  "version": "1.0.0",
+  "version": "1.9.1",
   "displayName": "SUBlime",
   "description": "Import asset from Blender",
-  "unity": "2019.1",
+  "unity": "2021.3",
   "author": {
     "name": "Julien Balestrieri",
     "email": "julien.balestrieri@small-studio.io"

@@ -1,6 +1,6 @@
 {
   "name": "com.small.sublime",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "displayName": "SUBlime",
   "description": "Import asset from Blender",
   "unity": "2021.3",

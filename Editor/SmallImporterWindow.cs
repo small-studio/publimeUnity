@@ -13,7 +13,7 @@ public class SmallImporterWindow : EditorWindow
     public static SmallLogger.LogType logMask;
     public static ModelImporterMaterialImportMode materialImportMode = ModelImporterMaterialImportMode.None;
     public static Shader defaultShader = null;
-    public static string version = "1.9.1";
+    public static string version = "1.9.2";
 
     [MenuItem("Window/Small Importer")]
     static void Init()

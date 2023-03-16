@@ -25,9 +25,9 @@ public class SmallImporterUtils
         return null;
     }
 
-    public static bool PrefabExists(string fileName)
+    public static bool PrefabExists(string fileName, string path)
     {
-        string[] results = AssetDatabase.FindAssets(fileName);
+        string[] results = AssetDatabase.FindAssets(fileName, new string[] { path });
         if (results != null && results.Length > 0)
         {
             foreach (var result in results)
@@ -52,7 +52,7 @@ public class SmallImporterUtils
         string fileName = Path.GetFileNameWithoutExtension(xmlPath);
         string fullPath = Path.Combine(path, fileName + ".prefab");
         
-        if (PrefabExists(fileName))
+        if (PrefabExists(fullPath, path))
         {
             SmallLogger.Log(SmallLogger.LogType.PreImport, "Prefab '" + fileName + "' already exists.");
         }
